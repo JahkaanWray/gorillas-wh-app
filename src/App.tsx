@@ -47,6 +47,26 @@ function Order(order: any) {
     );
 }
 
+function FullOrder(order: any) {
+    return (
+        <div>
+            <p>{order.id}</p>
+            <p>{order.store.name}</p>
+            <p>{order.customer}</p>
+            <p>{order.status}</p>
+            <ul>
+                {order.orderDetails.map((orderDetail: any, index: any) => {
+                    return (
+                        <li
+                            key={index}
+                        >{`${orderDetail.product.name} x${orderDetail.quantity}`}</li>
+                    );
+                })}
+            </ul>
+        </div>
+    );
+}
+
 function App() {
     const [data, setData] = useState([]);
     const [currentOrder, setCurrentOrder] = useState(null);
@@ -78,7 +98,7 @@ function App() {
     const orderPage = (order: any) => {
         return (
             <>
-                {Order(order)}
+                {FullOrder(order)}
                 <button
                     onClick={async () => {
                         await unpickOrder(order.id);
@@ -101,7 +121,7 @@ function App() {
                         setCurrentOrder(null);
                     }}
                 >
-                    Complete
+                    Confirm
                 </button>
             </>
         );
