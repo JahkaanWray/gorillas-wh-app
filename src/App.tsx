@@ -29,8 +29,12 @@ async function confirmOrder(orderId: string) {
 }
 
 async function pickOrder(orderId: string) {
+    const body = {
+        pickerId: "84a5001c-102a-4eec-9fab-b8d0fa22df42",
+    };
     const res = await fetch(`http://localhost:8080/orders/${orderId}/pick`, {
         method: "POST",
+        body: JSON.stringify(body),
     });
     const data = await res.json();
     return data;
@@ -41,7 +45,7 @@ function Order(order: any) {
         <div>
             <p>{order.id}</p>
             <p>{order.storeId}</p>
-            <p>{order.customer}</p>
+            <p>{order.customer.name}</p>
             <p>{order.status}</p>
         </div>
     );
