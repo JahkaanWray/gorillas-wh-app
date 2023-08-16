@@ -28,9 +28,9 @@ async function confirmOrder(orderId: string) {
     return data;
 }
 
-async function pickOrder(orderId: string) {
+async function pickOrder(orderId: string, pickerId: string) {
     const body = {
-        pickerId: "2cf023cc-6f0b-4c95-b625-ce51af22001c",
+        pickerId: pickerId,
     };
     const res = await fetch(`http://localhost:8080/orders/${orderId}/pick`, {
         method: "POST",
@@ -43,6 +43,11 @@ async function pickOrder(orderId: string) {
     return data;
 }
 
+async function getUsers() {
+    const res = await fetch(`http://localhost:8080/users`);
+    const data = await res.json();
+    return data;
+}
 function Order(order: any) {
     return (
         <div>
@@ -75,26 +80,79 @@ function FullOrder(order: any) {
 }
 
 function App() {
-    const [data, setData] = useState([]);
+    const [data, setData] = useState([] as any);
     const [currentOrder, setCurrentOrder] = useState(null);
+    const [pickerId, setPickerId] = useState<string | null>(null);
+    const [pickerOptions, setPickerOptions] = useState<any | null>(null);
+    const [storeId, setStoreId] = useState(null);
+    const [ws, setWS] = useState<WebSocket>();
 
     useEffect(() => {
+        const ws = new WebSocket("ws://localhost:8080");
+        ws.onopen = () => {
+            console.log("WS server opened");
+        };
+        setWS(ws);
+    }, []);
+    useEffect(() => {
         const fetchData = async () => {
-            const orders = await getOrders({
-                status: "NEW",
-            });
-            setData(orders);
+            const users = await getUsers();
+            setPickerOptions(users);
         };
         fetchData();
     }, []);
-    const orderList = data.map((order: any, index) => {
+    useEffect(() => {
+        if (storeId) {
+            const fetchData = async () => {
+                const orders = await getOrders({
+                    storeId: storeId,
+                    status: "NEW",
+                });
+                setData(orders);
+            };
+            fetchData();
+        }
+    }, [storeId]);
+    if (ws) {
+        ws.onmessage = (event) => {
+            console.log(event.data);
+            console.log(data);
+            const eventData = JSON.parse(event.data);
+            console.log(eventData);
+            if (eventData.msg == "New Order") {
+                const newData = [eventData.order, ...data];
+                setData(newData);
+                console.log(data);
+            } else if (eventData.msg == "Picked Order") {
+                const newData = data.filter((order: any) => {
+                    console.log(order.id);
+                    return order.id != eventData.order.id;
+                });
+                console.log(eventData.order.id);
+                setData(newData);
+                console.log(data);
+            } else if (eventData.msg == "Unpicked Order") {
+                const newData = [eventData.order, ...data];
+                console.log(newData);
+                setData(newData);
+                console.log(data);
+            }
+            console.log(data);
+        };
+    }
+    console.log(data);
+    const orderList = data.map((order: any, index: number) => {
         return (
             <li
                 key={index}
                 onClick={async () => {
-                    const pickedOrder = await pickOrder(order.id);
-                    console.log(pickedOrder.order);
-                    setCurrentOrder(pickedOrder.order);
+                    const pickedOrder = await pickOrder(
+                        order.id,
+                        pickerId as string
+                    );
+                    console.log(pickedOrder);
+                    setCurrentOrder(pickedOrder);
+                    console.log(currentOrder);
                 }}
             >
                 {" "}
@@ -133,6 +191,26 @@ function App() {
             </>
         );
     };
+    if (!pickerId && pickerOptions) {
+        return (
+            <>
+                {pickerOptions.map((picker: any, index: number) => {
+                    return (
+                        <div
+                            key={index}
+                            onClick={() => {
+                                setPickerId(picker.id);
+                                console.log(picker);
+                                setStoreId(picker.stores[0].id);
+                            }}
+                        >
+                            {picker.name}, {picker.stores[0].name}
+                        </div>
+                    );
+                })}
+            </>
+        );
+    }
     if (currentOrder) {
         return <>{orderPage(currentOrder)}</>;
     } else {
