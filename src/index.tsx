@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import CustomerStore from "./CustomerStore";
+import Portal from "./Portal";
 
 const root = ReactDOM.createRoot(
     document.getElementById("root") as HTMLElement
@@ -12,6 +13,7 @@ root.render(
     <React.StrictMode>
         <CustomerStore />
         <App />
+        <Portal />
     </React.StrictMode>
 );
 
