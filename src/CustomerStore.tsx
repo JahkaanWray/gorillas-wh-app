@@ -4,11 +4,12 @@ function Product(entry: any, key: number, setCart: Function, cart: any) {
     const addToCart = () => {
         const { ...newCart } = cart;
         const max = entry.quantity;
-        newCart[entry.productId] = newCart[entry.productId]
-            ? newCart[entry.productId] >= max
-                ? max
-                : newCart[entry.productId] + 1
-            : 1;
+        newCart[entry.productId] =
+            newCart[entry.productId] !== null
+                ? newCart[entry.productId] >= max
+                    ? max
+                    : newCart[entry.productId] + 1
+                : 1;
         setCart(newCart);
         console.log(cart);
     };
@@ -24,16 +25,40 @@ function Product(entry: any, key: number, setCart: Function, cart: any) {
 }
 
 function CustomerStore() {
+    const [customerId, setCustomerId] = useState<string | null>(null);
+    const [storeId, setStoreId] = useState<string | null>(null);
+    const [addressId, setAddressId] = useState<string | null>(null);
+    const [customerOptions, setCustomerOptions] = useState<any>(null);
     const [productData, setProductData] = useState(null as any);
     const [cart, setCart] = useState({} as any);
     useEffect(() => {
         const getData = async () => {
-            const res = await fetch("http://localhost:8080/inventory");
-            const data = await res.json();
-            setProductData(data);
+            let res = await fetch(`http://localhost:8080/stores`);
+            const stores = await res.json();
+            res = await fetch("http://localhost:8080/customers");
+            const customers = await res.json();
+            setCustomerOptions({
+                stores,
+                customers,
+            });
         };
         getData();
     }, []);
+
+    useEffect(() => {
+        if (storeId) {
+            const getData = async () => {
+                let res = await fetch(
+                    `http://localhost:8080/inventory?` +
+                        new URLSearchParams({ storeId: storeId }),
+                    {}
+                );
+                const items = await res.json();
+                setProductData(items);
+            };
+            getData();
+        }
+    }, [storeId]);
 
     async function order() {
         const productIds = Object.keys(cart);
@@ -46,9 +71,9 @@ function CustomerStore() {
         await fetch("http://localhost:8080/orders", {
             method: "POST",
             body: JSON.stringify({
-                customerId: "0a858e6f-d2d1-48f6-8638-066fa48b95d0",
-                storeId: "6c13ec88-af7c-412b-adb5-0e656ae2b155",
-                addressId: "ce0197d3-6205-427a-a79f-2836e8633cc6",
+                customerId: customerId,
+                storeId: storeId,
+                addressId: addressId,
                 items: items,
             }),
             headers: {
@@ -57,7 +82,55 @@ function CustomerStore() {
         });
     }
 
-    return productData == null ? (
+    return customerOptions == null ? (
+        <>Loading</>
+    ) : storeId == null || customerId == null || addressId == null ? (
+        <>
+            {customerOptions.stores.map((store: any) => {
+                return (
+                    <div
+                        onClick={() => {
+                            setStoreId(store.id);
+                        }}
+                    >
+                        {store.name}
+                    </div>
+                );
+            })}
+            ,
+            {customerOptions.customers.map((customer: any) => {
+                return (
+                    <div
+                        onClick={() => {
+                            const state = { ...customerOptions };
+                            state.addresses = customer.addresses;
+                            setCustomerOptions(state);
+                            setAddressId(null);
+                            setCustomerId(customer.id);
+                        }}
+                    >
+                        {customer.name}
+                    </div>
+                );
+            })}
+            ,
+            {customerOptions.addresses == null ? (
+                <></>
+            ) : (
+                customerOptions.addresses.map((address: any) => {
+                    return (
+                        <div
+                            onClick={() => {
+                                setAddressId(address.id);
+                            }}
+                        >
+                            {address.line1}
+                        </div>
+                    );
+                })
+            )}
+        </>
+    ) : productData == null ? (
         <div>Loading</div>
     ) : (
         <>

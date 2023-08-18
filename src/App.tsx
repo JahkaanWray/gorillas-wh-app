@@ -95,12 +95,14 @@ function App() {
         setWS(ws);
     }, []);
     useEffect(() => {
-        const fetchData = async () => {
-            const users = await getUsers();
-            setPickerOptions(users);
-        };
-        fetchData();
-    }, []);
+        if (!pickerId) {
+            const fetchData = async () => {
+                const users = await getUsers();
+                setPickerOptions(users);
+            };
+            fetchData();
+        }
+    }, [pickerId]);
     useEffect(() => {
         if (storeId) {
             const fetchData = async () => {
@@ -119,11 +121,11 @@ function App() {
             console.log(data);
             const eventData = JSON.parse(event.data);
             console.log(eventData);
-            if (eventData.msg == "New Order") {
+            if (eventData.msg == "Order Created") {
                 const newData = [eventData.order, ...data];
                 setData(newData);
                 console.log(data);
-            } else if (eventData.msg == "Picked Order") {
+            } else if (eventData.msg == "Picked Order" && data) {
                 const newData = data.filter((order: any) => {
                     console.log(order.id);
                     return order.id != eventData.order.id;
@@ -141,25 +143,27 @@ function App() {
         };
     }
     console.log(data);
-    const orderList = data.map((order: any, index: number) => {
-        return (
-            <li
-                key={index}
-                onClick={async () => {
-                    const pickedOrder = await pickOrder(
-                        order.id,
-                        pickerId as string
-                    );
-                    console.log(pickedOrder);
-                    setCurrentOrder(pickedOrder);
-                    console.log(currentOrder);
-                }}
-            >
-                {" "}
-                {Order(order)}{" "}
-            </li>
-        );
-    });
+    const orderList = () => {
+        return data.map((order: any, index: number) => {
+            return (
+                <li
+                    key={index}
+                    onClick={async () => {
+                        const pickedOrder = await pickOrder(
+                            order.id,
+                            pickerId as string
+                        );
+                        console.log(pickedOrder);
+                        setCurrentOrder(pickedOrder);
+                        console.log(currentOrder);
+                    }}
+                >
+                    {" "}
+                    {Order(order)}{" "}
+                </li>
+            );
+        });
+    };
     const orderPage = (order: any) => {
         return (
             <>
@@ -169,6 +173,7 @@ function App() {
                         await unpickOrder(order.id);
                         const orders = await getOrders({
                             status: "NEW",
+                            storeId: storeId,
                         });
                         setData(orders);
                         setCurrentOrder(null);
@@ -181,6 +186,7 @@ function App() {
                         await confirmOrder(order.id);
                         const orders = await getOrders({
                             status: "NEW",
+                            storeId: storeId,
                         });
                         setData(orders);
                         setCurrentOrder(null);
@@ -213,13 +219,25 @@ function App() {
     }
     if (currentOrder) {
         return <>{orderPage(currentOrder)}</>;
-    } else {
+    } else if (data) {
         return (
             <>
+                <button
+                    onClick={() => {
+                        setPickerOptions(null);
+                        setData([]);
+                        setPickerId(null);
+                        setStoreId(null);
+                    }}
+                >
+                    Back
+                </button>
                 <div>{currentOrder}</div>
-                <div>{orderList}</div>
+                <div>{orderList()}</div>
             </>
         );
+    } else {
+        return <>Loading</>;
     }
 }
 
