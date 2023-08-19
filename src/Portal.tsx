@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
 
+async function confirmOrder(orderId: string) {
+    const res = await fetch(`http://localhost:8080/orders/${orderId}/confirm`, {
+        method: "POST",
+    });
+    const order = await res.json();
+    return order;
+}
+
 function Portal() {
     const [orderData, setOrderData] = useState<object[] | null>(null);
     const [storeId, setStoreId] = useState(null);
@@ -57,6 +65,7 @@ function Portal() {
                 <tr>
                     <th>Customer</th>
                     <th>Address</th>
+                    <th>Items</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -65,9 +74,44 @@ function Portal() {
                         <tr>
                             <td>{order.customer.name}</td>
                             <td>{order.address.line1}</td>
+                            <td>
+                                {order.orderDetails.reduce(
+                                    (acc: number, detail: any) =>
+                                        acc + detail.quantity,
+                                    0
+                                )}
+                            </td>
                             <td>{order.status}</td>
                             <td>
-                                <button>Test</button>
+                                {order.status == "NEW" ? (
+                                    <button>View Order</button>
+                                ) : order.status == "PROCESSING" ? (
+                                    <button
+                                        onClick={async () => {
+                                            const newOrder = await confirmOrder(
+                                                order.id
+                                            );
+                                            const oldData = [...orderData];
+                                            const newData = oldData.filter(
+                                                (order: any) => {
+                                                    return true;
+                                                }
+                                            );
+                                            setOrderData([
+                                                newOrder.order,
+                                                ...newData,
+                                            ]);
+                                        }}
+                                    >
+                                        Confirm
+                                    </button>
+                                ) : order.status == "READY" ? (
+                                    <button>Assign</button>
+                                ) : order.status == "COMPLETE" ? (
+                                    <></>
+                                ) : (
+                                    <button>Complete</button>
+                                )}
                             </td>
                         </tr>
                     );
