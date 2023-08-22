@@ -8,6 +8,7 @@ function App() {
     const [mode, setMode] = useState(0);
     return (
         <>
+            <h1 className="">Hello</h1>
             <button
                 onClick={() => {
                     setMode((mode + 1) % 4);

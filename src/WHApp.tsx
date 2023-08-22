@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Card, CardContent } from "./components/ui/card";
+import { Button } from "./components/ui/button";
 import logo from "./logo.svg";
 import "./App.css";
 
@@ -50,12 +52,16 @@ async function getUsers() {
 }
 function Order(order: any) {
     return (
-        <div>
-            <p>{order.id}</p>
-            <p>{order.storeId}</p>
-            <p>{order.customer.name}</p>
-            <p>{order.status}</p>
-        </div>
+        <>
+            <Card>
+                <CardContent>
+                    <p>{order.id}</p>
+                    <p>{order.storeId}</p>
+                    <p>{order.customer.name}</p>
+                    <p>{order.status}</p>
+                </CardContent>
+            </Card>
+        </>
     );
 }
 
@@ -168,7 +174,7 @@ function WHApp() {
         return (
             <>
                 {FullOrder(order)}
-                <button
+                <Button
                     onClick={async () => {
                         await unpickOrder(order.id);
                         const orders = await getOrders({
@@ -180,8 +186,8 @@ function WHApp() {
                     }}
                 >
                     Back
-                </button>
-                <button
+                </Button>
+                <Button
                     onClick={async () => {
                         await confirmOrder(order.id);
                         const orders = await getOrders({
@@ -193,7 +199,7 @@ function WHApp() {
                     }}
                 >
                     Confirm
-                </button>
+                </Button>
             </>
         );
     };
