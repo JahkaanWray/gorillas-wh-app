@@ -81,3 +81,7 @@ Touring Dashboard
 --Turn algorithm on/off
 --Manually assign orders
 --Send/Receive WS messages on order updates
+
+
+
+List all WebSocket requirements
