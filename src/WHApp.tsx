@@ -175,6 +175,7 @@ function WHApp() {
             <>
                 {FullOrder(order)}
                 <Button
+                    className="outline-4 outline-black bg-red-600 rounded"
                     onClick={async () => {
                         await unpickOrder(order.id);
                         const orders = await getOrders({

@@ -1,0 +1,83 @@
+Warehouse App
+-Login Page
+--Select User and Store
+-Picking Page
+--See list of pickable orders
+--See all items in order 
+--Can scan items to remove from list
+--Confirm Order
+--Receive WS messages when orders are updated
+--Receive WS messages when customers put items in cart
+-Inventory Page
+--Scan items or search by name or barcode
+--Change quantity or zone
+-Waste Page
+--Scan items or search by name or barcode
+--Waste items
+-Counting Page
+--See current counting list
+--Change quantity
+Rider App
+-Login Page
+--Select rider and store
+-Riding Page
+--Go on and off duty
+--Scan order barcodes or assign orders manually
+--Start trips
+--See Order info 
+--Complete Orders
+--Cancel orders
+--Receive WS message when assigned an order
+-Stats Page
+--Select date range
+--See stats
+Customer App
+-Login Page
+--Select Customer
+--Create new Customer
+-Shop Page
+--Select Address
+--Create new Address
+--See all in stock items for current store
+--Add items to Cart
+--Send WS message when adding items to cart
+--Receive WS message when inventory changes
+-Cart Page
+--Edit Cart
+--Send WS message when updating cart
+--Create Order
+Portal
+-Login Page
+--Select User
+-Order List Page
+--See list of orders
+--Filter, sort and search orders
+--Update orders(confirm, assign, unassign, complete, cancel)
+--See individual order
+--Receive WS message when order is updated
+-Order Map Page
+--See orders on Map
+--See all on duty riders and status
+--Receive WS message when order is updated
+-Inventory Page
+--See list of items
+--Filter, sort and search items
+--See logs for items
+--Update quantity and zone
+--Receive WS message when inventory changes
+-Riders Page
+--See riders
+--Update rider status and info
+--Create new riders
+-Users Page
+--Create new Users
+--update users
+-Stores Page
+--Create new Stores
+--See store radii
+--Recalculate store radii
+Touring Dashboard
+-Main Page
+--Turn algorithm on/off
+--Manually assign orders
+--Send/Receive WS messages on order updates
