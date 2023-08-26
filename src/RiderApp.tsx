@@ -15,6 +15,7 @@ import {
 } from "./components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
 import { Switch } from "./components/ui/switch";
+import { riderOffDuty, riderOnDuty } from "./helperFunctions/riderFunctions";
 
 function RiderApp() {
     const [riderId, setRiderId] = useState<string | null>(null);
@@ -167,8 +168,9 @@ function RiderApp() {
         <>
             <Switch
                 checked={onDuty == "ON_DUTY"}
-                onCheckedChange={() => {
-                    setOnDuty("OFF_DUTY");
+                onCheckedChange={async () => {
+                    const rider = await riderOffDuty(riderId);
+                    setOnDuty(rider.id);
                 }}
             >
                 On Duty
@@ -198,8 +200,10 @@ function RiderApp() {
         <>
             <Switch
                 checked={onDuty == "ON_DUTY"}
-                onCheckedChange={() => {
-                    setOnDuty("ON_DUTY");
+                onCheckedChange={async () => {
+                    console.log(storeId);
+                    const rider = await riderOnDuty(riderId, storeId);
+                    setOnDuty(rider.status);
                 }}
             />
         </>
