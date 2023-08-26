@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
+import {} from "./helperFunctions/orderFunctions";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "./components/ui/select";
 
 function Product(entry: any, key: number, setCart: Function, cart: any) {
     const addToCart = () => {
         const { ...newCart } = cart;
         const max = entry.quantity;
+        console.log(newCart[entry.productId]);
         newCart[entry.productId] =
-            newCart[entry.productId] !== null
+            newCart[entry.productId] != null
                 ? newCart[entry.productId] >= max
                     ? max
                     : newCart[entry.productId] + 1
@@ -86,48 +95,82 @@ function CustomerStore() {
         <>Loading</>
     ) : storeId == null || customerId == null || addressId == null ? (
         <>
-            {customerOptions.stores.map((store: any) => {
-                return (
-                    <div
-                        onClick={() => {
-                            setStoreId(store.id);
-                        }}
-                    >
-                        {store.name}
-                    </div>
-                );
-            })}
-            ,
-            {customerOptions.customers.map((customer: any) => {
-                return (
-                    <div
-                        onClick={() => {
-                            const state = { ...customerOptions };
-                            state.addresses = customer.addresses;
-                            setCustomerOptions(state);
-                            setAddressId(null);
-                            setCustomerId(customer.id);
-                        }}
-                    >
-                        {customer.name}
-                    </div>
-                );
-            })}
-            ,
+            <Select
+                onValueChange={(value) => {
+                    setStoreId(value);
+                }}
+            >
+                <SelectTrigger>
+                    <SelectValue placeholder="Select Store"></SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                    {customerOptions.stores.map((store: any) => {
+                        return (
+                            <SelectItem
+                                value={store.id}
+                                onClick={() => {
+                                    setStoreId(store.id);
+                                }}
+                            >
+                                {store.name}
+                            </SelectItem>
+                        );
+                    })}
+                </SelectContent>
+            </Select>
+            <Select
+                onValueChange={(value) => {
+                    const customer = JSON.parse(value);
+                    const state = { ...customerOptions };
+                    state.addresses = customer.addresses;
+                    setCustomerOptions(state);
+                    setAddressId(null);
+                    setCustomerId(customer.id);
+                }}
+            >
+                <SelectTrigger>
+                    <SelectValue placeholder="Select Customer"></SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                    {customerOptions.customers.map((customer: any) => {
+                        return (
+                            <SelectItem
+                                value={JSON.stringify(customer)}
+                                onClick={() => {
+                                    const state = { ...customerOptions };
+                                    state.addresses = customer.addresses;
+                                    setCustomerOptions(state);
+                                    setAddressId(null);
+                                    setCustomerId(customer.id);
+                                }}
+                            >
+                                {customer.name}
+                            </SelectItem>
+                        );
+                    })}
+                </SelectContent>
+            </Select>
             {customerOptions.addresses == null ? (
                 <></>
             ) : (
-                customerOptions.addresses.map((address: any) => {
-                    return (
-                        <div
-                            onClick={() => {
-                                setAddressId(address.id);
-                            }}
-                        >
-                            {address.line1}
-                        </div>
-                    );
-                })
+                <Select
+                    onValueChange={(value) => {
+                        setAddressId(value);
+                    }}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select Address"></SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {customerOptions.addresses.map((address: any) => {
+                            return (
+                                <SelectItem value={address.id}>
+                                    {address.line1}
+                                </SelectItem>
+                            );
+                        })}
+                    </SelectContent>
+                </Select>
             )}
         </>
     ) : productData == null ? (

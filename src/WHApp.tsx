@@ -1,63 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardContent } from "./components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Button } from "./components/ui/button";
+import {
+    unpickOrder,
+    getOrders,
+    confirmOrder,
+    pickOrder,
+} from "./helperFunctions/orderFunctions";
+import { getUsers } from "./helperFunctions/userFunctions";
 import logo from "./logo.svg";
-import "./App.css";
+import "./styles/globals.css";
+import {
+    Select,
+    SelectItem,
+    SelectContent,
+    SelectTrigger,
+    SelectValue,
+} from "./components/ui/select";
 
-async function unpickOrder(orderId: string) {
-    const res = await fetch(`http://localhost:8080/orders/${orderId}/unpick`, {
-        method: "POST",
-    });
-    const data = await res.json();
-    return data;
-}
-
-async function getOrders(params: any) {
-    const res = await fetch(
-        `http://localhost:8080/orders` + "?" + new URLSearchParams(params),
-        {
-            method: "GET",
-        }
-    );
-    const data = await res.json();
-    return data;
-}
-async function confirmOrder(orderId: string) {
-    const res = await fetch(`http://localhost:8080/orders/${orderId}/confirm`, {
-        method: "POST",
-    });
-    const data = await res.json();
-    return data;
-}
-
-async function pickOrder(orderId: string, pickerId: string) {
-    const body = {
-        pickerId: pickerId,
-    };
-    const res = await fetch(`http://localhost:8080/orders/${orderId}/pick`, {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-            "content-type": "application/json",
-        },
-    });
-    const data = await res.json();
-    return data;
-}
-
-async function getUsers() {
-    const res = await fetch(`http://localhost:8080/users`);
-    const data = await res.json();
-    return data;
-}
 function Order(order: any) {
     return (
         <>
-            <Card>
+            <Card className=" m-4 ">
+                <CardHeader>
+                    <CardTitle>{order.customer.name}</CardTitle>
+                </CardHeader>
                 <CardContent>
-                    <p>{order.id}</p>
-                    <p>{order.storeId}</p>
-                    <p>{order.customer.name}</p>
+                    <p>{order.store.name}</p>
+                    <p>{order.address.line1}</p>
+                    <p>{order.orderDetails.length} items</p>
                     <p>{order.status}</p>
                 </CardContent>
             </Card>
@@ -75,9 +46,15 @@ function FullOrder(order: any) {
             <ul>
                 {order.orderDetails.map((orderDetail: any, index: any) => {
                     return (
-                        <li
-                            key={index}
-                        >{`${orderDetail.product.name} x${orderDetail.quantity}`}</li>
+                        <Card key={index}>
+                            <CardContent>
+                                <CardTitle>
+                                    {orderDetail.product.name}
+                                </CardTitle>
+                                <p>Barcode: {orderDetail.product.id}</p>
+                                <p>Quantity: {orderDetail.quantity}</p>
+                            </CardContent>
+                        </Card>
                     );
                 })}
             </ul>
@@ -90,7 +67,7 @@ function WHApp() {
     const [currentOrder, setCurrentOrder] = useState(null);
     const [pickerId, setPickerId] = useState<string | null>(null);
     const [pickerOptions, setPickerOptions] = useState<any | null>(null);
-    const [storeId, setStoreId] = useState(null);
+    const [storeId, setStoreId] = useState<string | null>(null);
     const [ws, setWS] = useState<WebSocket>();
 
     useEffect(() => {
@@ -131,7 +108,7 @@ function WHApp() {
                 const newData = [eventData.order, ...data];
                 setData(newData);
                 console.log(data);
-            } else if (eventData.msg == "Picked Order" && data) {
+            } else if (eventData.msg == "Order Picked" && data) {
                 const newData = data.filter((order: any) => {
                     console.log(order.id);
                     return order.id != eventData.order.id;
@@ -139,7 +116,7 @@ function WHApp() {
                 console.log(eventData.order.id);
                 setData(newData);
                 console.log(data);
-            } else if (eventData.msg == "Unpicked Order") {
+            } else if (eventData.msg == "Order Unpicked") {
                 const newData = [eventData.order, ...data];
                 console.log(newData);
                 setData(newData);
@@ -175,7 +152,7 @@ function WHApp() {
             <>
                 {FullOrder(order)}
                 <Button
-                    className="outline-4 outline-black bg-red-600 rounded"
+                    variant="default"
                     onClick={async () => {
                         await unpickOrder(order.id);
                         const orders = await getOrders({
@@ -189,6 +166,7 @@ function WHApp() {
                     Back
                 </Button>
                 <Button
+                    variant="outline"
                     onClick={async () => {
                         await confirmOrder(order.id);
                         const orders = await getOrders({
@@ -206,22 +184,29 @@ function WHApp() {
     };
     if (!pickerId && pickerOptions) {
         return (
-            <>
-                {pickerOptions.map((picker: any, index: number) => {
-                    return (
-                        <div
-                            key={index}
-                            onClick={() => {
-                                setPickerId(picker.id);
-                                console.log(picker);
-                                setStoreId(picker.stores[0].id);
-                            }}
-                        >
-                            {picker.name}, {picker.stores[0].name}
-                        </div>
-                    );
-                })}
-            </>
+            <Select
+                onValueChange={(value) => {
+                    const [picker, store] = value.split("|");
+                    setPickerId(picker);
+                    setStoreId(store);
+                }}
+            >
+                <SelectTrigger>
+                    <SelectValue placeholder="Select User"></SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                    {pickerOptions.map((picker: any, index: number) => {
+                        return (
+                            <SelectItem
+                                value={picker.id + "|" + picker.stores[0].id}
+                                key={index}
+                            >
+                                {picker.name}, {picker.stores[0].name}
+                            </SelectItem>
+                        );
+                    })}
+                </SelectContent>
+            </Select>
         );
     }
     if (currentOrder) {
@@ -229,7 +214,7 @@ function WHApp() {
     } else if (data) {
         return (
             <>
-                <button
+                <Button
                     onClick={() => {
                         setPickerOptions(null);
                         setData([]);
@@ -237,10 +222,10 @@ function WHApp() {
                         setStoreId(null);
                     }}
                 >
-                    Back
-                </button>
+                    Log out
+                </Button>
                 <div>{currentOrder}</div>
-                <div>{orderList()}</div>
+                <ul>{orderList()}</ul>
             </>
         );
     } else {

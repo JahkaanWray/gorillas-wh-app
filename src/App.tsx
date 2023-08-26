@@ -3,19 +3,19 @@ import CustomerStore from "./CustomerStore";
 import Portal from "./Portal";
 import WHApp from "./WHApp";
 import RiderApp from "./RiderApp";
+import { Button } from "./components/ui/button";
 
 function App() {
     const [mode, setMode] = useState(0);
     return (
         <>
-            <h1 className="">Hello</h1>
-            <button
+            <Button
                 onClick={() => {
                     setMode((mode + 1) % 4);
                 }}
             >
                 Switch Mode
-            </button>
+            </Button>
 
             {mode == 0 ? (
                 <>
