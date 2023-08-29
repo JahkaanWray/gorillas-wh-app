@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Button } from "./components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@radix-ui/react-radio-group";
 import {
     unpickOrder,
     getOrders,
@@ -58,6 +59,7 @@ function FullOrder(order: any) {
                     );
                 })}
             </ul>
+            <div></div>
         </div>
     );
 }
@@ -121,6 +123,19 @@ function WHApp() {
                 console.log(newData);
                 setData(newData);
                 console.log(data);
+            } else if (eventData.msg == "Cart Update") {
+                const orderDetails = Object.keys(eventData.cart).map((id) => {
+                    return { id: id, quantity: eventData.cart[id] };
+                });
+                console.log(orderDetails);
+                const order = JSON.parse(JSON.stringify(data[0]));
+                console.log(order);
+                order.orderDetails = orderDetails;
+                console.log(order);
+                const newData = [...data, order];
+                console.log(newData);
+                setData(newData);
+                console.log(data);
             }
             console.log(data);
         };
@@ -151,6 +166,13 @@ function WHApp() {
         return (
             <>
                 {FullOrder(order)}
+                <div>
+                    <RadioGroup>
+                        <RadioGroupItem value="unpicked"></RadioGroupItem>
+                        <RadioGroupItem value="picked"></RadioGroupItem>
+                        <RadioGroupItem value="bag"></RadioGroupItem>
+                    </RadioGroup>
+                </div>
                 <Button
                     variant="default"
                     onClick={async () => {

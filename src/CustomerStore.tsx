@@ -8,7 +8,13 @@ import {
     SelectValue,
 } from "./components/ui/select";
 
-function Product(entry: any, key: number, setCart: Function, cart: any) {
+function Product(
+    entry: any,
+    key: number,
+    setCart: Function,
+    cart: any,
+    ws: WebSocket
+) {
     const addToCart = () => {
         const { ...newCart } = cart;
         const max = entry.quantity;
@@ -21,6 +27,7 @@ function Product(entry: any, key: number, setCart: Function, cart: any) {
                 : 1;
         setCart(newCart);
         console.log(cart);
+        ws.send(JSON.stringify({ msg: "Cart Update", cart: cart }));
     };
     return (
         <div key={key}>
@@ -40,6 +47,15 @@ function CustomerStore() {
     const [customerOptions, setCustomerOptions] = useState<any>(null);
     const [productData, setProductData] = useState(null as any);
     const [cart, setCart] = useState({} as any);
+    const [ws, setWS] = useState<WebSocket>();
+
+    useEffect(() => {
+        const ws = new WebSocket("ws://localhost:8080");
+        ws.onopen = () => {
+            console.log("Websocket opened");
+        };
+        setWS(ws);
+    }, []);
     useEffect(() => {
         const getData = async () => {
             let res = await fetch(`http://localhost:8080/stores`);
@@ -179,7 +195,13 @@ function CustomerStore() {
         <>
             <div>
                 {productData.map((entry: any, index: number) => {
-                    return Product(entry, index, setCart, cart);
+                    return Product(
+                        entry,
+                        index,
+                        setCart,
+                        cart,
+                        ws as WebSocket
+                    );
                 })}
             </div>
             <button onClick={order}>Order</button>

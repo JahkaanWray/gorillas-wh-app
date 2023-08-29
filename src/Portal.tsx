@@ -92,6 +92,7 @@ function Portal() {
                 </TableHeader>
                 <TableBody>
                     {orderData.map((order: any) => {
+                        console.log(order);
                         return (
                             <TableRow key={order.id}>
                                 <TableCell>{order.customer.name}</TableCell>
@@ -121,7 +122,7 @@ function Portal() {
                                                     }
                                                 );
                                                 setOrderData([
-                                                    newOrder.order,
+                                                    newOrder,
                                                     ...newData,
                                                 ]);
                                             }}
