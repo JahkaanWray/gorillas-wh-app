@@ -16,6 +16,7 @@ import {
     SelectContent,
     SelectItem,
 } from "./components/ui/select";
+import { completeOrder } from "./helperFunctions/orderFunctions";
 
 async function confirmOrder(orderId: string) {
     const res = await fetch(`http://localhost:8080/orders/${orderId}/confirm`, {
@@ -116,25 +117,51 @@ function Portal() {
                                                         order.id
                                                     );
                                                 const oldData = [...orderData];
-                                                const newData = oldData.filter(
+                                                const newData = oldData.map(
                                                     (order: any) => {
-                                                        return true;
+                                                        return order.id ==
+                                                            newOrder.id
+                                                            ? newOrder
+                                                            : order;
                                                     }
                                                 );
-                                                setOrderData([
+                                                const newState = [
                                                     newOrder,
                                                     ...newData,
-                                                ]);
+                                                ];
+                                                setOrderData(newData);
                                             }}
                                         >
                                             Confirm
                                         </Button>
                                     ) : order.status == "READY" ? (
                                         <Button>Assign</Button>
+                                    ) : order.status == "ASSIGNED" ||
+                                      order.status == "DELIVERING" ? (
+                                        <Button
+                                            onClick={async () => {
+                                                const newOrder =
+                                                    await completeOrder(
+                                                        order.id
+                                                    );
+                                                const oldData = [...orderData];
+                                                const newData = oldData.map(
+                                                    (order: any) => {
+                                                        return order.id ==
+                                                            newOrder.id
+                                                            ? newOrder
+                                                            : order;
+                                                    }
+                                                );
+                                                setOrderData(newData);
+                                            }}
+                                        >
+                                            Complete
+                                        </Button>
                                     ) : order.status == "COMPLETE" ? (
-                                        <></>
+                                        <>---</>
                                     ) : (
-                                        <Button>Complete</Button>
+                                        <>---</>
                                     )}
                                 </TableCell>
                             </TableRow>
