@@ -16,7 +16,9 @@ import {
     SelectContent,
     SelectItem,
 } from "./components/ui/select";
-import { completeOrder } from "./helperFunctions/orderFunctions";
+import { assignOrder, completeOrder } from "./helperFunctions/orderFunctions";
+import { Dialog, DialogTrigger, DialogContent } from "./components/ui/dialog";
+import { getRiders } from "./helperFunctions/riderFunctions";
 
 async function confirmOrder(orderId: string) {
     const res = await fetch(`http://localhost:8080/orders/${orderId}/confirm`, {
@@ -30,6 +32,7 @@ function Portal() {
     const [orderData, setOrderData] = useState<object[] | null>(null);
     const [storeId, setStoreId] = useState<string | null>(null);
     const [storeOptions, setStoreOptions] = useState<any>(null);
+    const [riderOptions, setRiderOptions] = useState<any>(null);
 
     useEffect(() => {
         const getData = async () => {
@@ -135,7 +138,74 @@ function Portal() {
                                             Confirm
                                         </Button>
                                     ) : order.status == "READY" ? (
-                                        <Button>Assign</Button>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button
+                                                    onClick={async () => {
+                                                        const riders =
+                                                            await getRiders(
+                                                                "ON_DUTY"
+                                                            );
+                                                        setRiderOptions(riders);
+                                                    }}
+                                                >
+                                                    Assign
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                {riderOptions ? (
+                                                    <div>
+                                                        {riderOptions.map(
+                                                            (rider: any) => {
+                                                                return (
+                                                                    <span>
+                                                                        <div>
+                                                                            {
+                                                                                rider.name
+                                                                            }
+                                                                        </div>
+                                                                        <Button
+                                                                            onClick={async () => {
+                                                                                const newOrder =
+                                                                                    await assignOrder(
+                                                                                        order.id,
+                                                                                        rider.id
+                                                                                    );
+                                                                                const oldData =
+                                                                                    [
+                                                                                        ...orderData,
+                                                                                    ];
+                                                                                const newData =
+                                                                                    oldData.map(
+                                                                                        (
+                                                                                            order: any
+                                                                                        ) => {
+                                                                                            return order.id ==
+                                                                                                newOrder.id
+                                                                                                ? newOrder
+                                                                                                : order;
+                                                                                        }
+                                                                                    );
+                                                                                setOrderData(
+                                                                                    newData
+                                                                                );
+                                                                                setRiderOptions(
+                                                                                    null
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            Assign
+                                                                        </Button>
+                                                                    </span>
+                                                                );
+                                                            }
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div>List of Riders</div>
+                                                )}
+                                            </DialogContent>
+                                        </Dialog>
                                     ) : order.status == "ASSIGNED" ||
                                       order.status == "DELIVERING" ? (
                                         <Button

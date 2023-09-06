@@ -21,3 +21,9 @@ export async function riderOffDuty(riderId: string) {
     const rider = await res.json();
     return rider;
 }
+
+export async function getRiders(status: string) {
+    const res = await fetch(`http://localhost:8080/riders?status=${status}`);
+    const riders = await res.json();
+    return riders;
+}
