@@ -18,6 +18,7 @@ import {
 } from "./components/ui/select";
 import { assignOrder, completeOrder } from "./helperFunctions/orderFunctions";
 import { Dialog, DialogTrigger, DialogContent } from "./components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { getRiders } from "./helperFunctions/riderFunctions";
 
 async function confirmOrder(orderId: string) {
@@ -28,11 +29,175 @@ async function confirmOrder(orderId: string) {
     return order;
 }
 
+function OrderList(
+    orderData: any,
+    setOrderData: Function,
+    riderOptions: any,
+    setRiderOptions: Function
+) {
+    return (
+        <Table>
+            <TableCaption>List of Orders</TableCaption>
+            <TableHeader>
+                <TableHead>Customer</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>Items</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead></TableHead>
+            </TableHeader>
+            <TableBody>
+                {orderData.map((order: any) => {
+                    console.log(order);
+                    return (
+                        <TableRow key={order.id}>
+                            <TableCell>{order.customer.name}</TableCell>
+                            <TableCell>{order.address.line1}</TableCell>
+                            <TableCell>
+                                {order.orderDetails.reduce(
+                                    (acc: number, detail: any) =>
+                                        acc + detail.quantity,
+                                    0
+                                )}
+                            </TableCell>
+                            <TableCell>{order.status}</TableCell>
+                            <TableCell>
+                                {order.status == "NEW" ? (
+                                    <Button>View Order</Button>
+                                ) : order.status == "PROCESSING" ? (
+                                    <Button
+                                        onClick={async () => {
+                                            const newOrder = await confirmOrder(
+                                                order.id
+                                            );
+                                            const oldData = [...orderData];
+                                            const newData = oldData.map(
+                                                (order: any) => {
+                                                    return order.id ==
+                                                        newOrder.id
+                                                        ? newOrder
+                                                        : order;
+                                                }
+                                            );
+                                            const newState = [
+                                                newOrder,
+                                                ...newData,
+                                            ];
+                                            setOrderData(newData);
+                                        }}
+                                    >
+                                        Confirm
+                                    </Button>
+                                ) : order.status == "READY" ? (
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                onClick={async () => {
+                                                    const riders =
+                                                        await getRiders(
+                                                            "ON_DUTY"
+                                                        );
+                                                    setRiderOptions(riders);
+                                                }}
+                                            >
+                                                Assign
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            {riderOptions ? (
+                                                <div>
+                                                    {riderOptions.map(
+                                                        (rider: any) => {
+                                                            return (
+                                                                <span>
+                                                                    <div>
+                                                                        {
+                                                                            rider.name
+                                                                        }
+                                                                    </div>
+                                                                    <Button
+                                                                        onClick={async () => {
+                                                                            const newOrder =
+                                                                                await assignOrder(
+                                                                                    order.id,
+                                                                                    rider.id
+                                                                                );
+                                                                            const oldData =
+                                                                                [
+                                                                                    ...orderData,
+                                                                                ];
+                                                                            const newData =
+                                                                                oldData.map(
+                                                                                    (
+                                                                                        order: any
+                                                                                    ) => {
+                                                                                        return order.id ==
+                                                                                            newOrder.id
+                                                                                            ? newOrder
+                                                                                            : order;
+                                                                                    }
+                                                                                );
+                                                                            setOrderData(
+                                                                                newData
+                                                                            );
+                                                                            setRiderOptions(
+                                                                                null
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        Assign
+                                                                    </Button>
+                                                                </span>
+                                                            );
+                                                        }
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div>List of Riders</div>
+                                            )}
+                                        </DialogContent>
+                                    </Dialog>
+                                ) : order.status == "ASSIGNED" ||
+                                  order.status == "DELIVERING" ? (
+                                    <Button
+                                        onClick={async () => {
+                                            const newOrder =
+                                                await completeOrder(order.id);
+                                            const oldData = [...orderData];
+                                            const newData = oldData.map(
+                                                (order: any) => {
+                                                    return order.id ==
+                                                        newOrder.id
+                                                        ? newOrder
+                                                        : order;
+                                                }
+                                            );
+                                            setOrderData(newData);
+                                        }}
+                                    >
+                                        Complete
+                                    </Button>
+                                ) : order.status == "COMPLETE" ? (
+                                    <>---</>
+                                ) : (
+                                    <>---</>
+                                )}
+                            </TableCell>
+                        </TableRow>
+                    );
+                })}
+            </TableBody>
+        </Table>
+    );
+}
+
 function Portal() {
     const [orderData, setOrderData] = useState<object[] | null>(null);
     const [storeId, setStoreId] = useState<string | null>(null);
     const [storeOptions, setStoreOptions] = useState<any>(null);
     const [riderOptions, setRiderOptions] = useState<any>(null);
+    const [tab, setTab] = useState("Order List");
+
+    const tabs = ["Order List", "Order Map", "Inventory", "Riders"];
 
     useEffect(() => {
         const getData = async () => {
@@ -85,160 +250,23 @@ function Portal() {
             >
                 Back
             </Button>
-            <Table>
-                <TableCaption>List of Orders</TableCaption>
-                <TableHeader>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Address</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead></TableHead>
-                </TableHeader>
-                <TableBody>
-                    {orderData.map((order: any) => {
-                        console.log(order);
-                        return (
-                            <TableRow key={order.id}>
-                                <TableCell>{order.customer.name}</TableCell>
-                                <TableCell>{order.address.line1}</TableCell>
-                                <TableCell>
-                                    {order.orderDetails.reduce(
-                                        (acc: number, detail: any) =>
-                                            acc + detail.quantity,
-                                        0
-                                    )}
-                                </TableCell>
-                                <TableCell>{order.status}</TableCell>
-                                <TableCell>
-                                    {order.status == "NEW" ? (
-                                        <Button>View Order</Button>
-                                    ) : order.status == "PROCESSING" ? (
-                                        <Button
-                                            onClick={async () => {
-                                                const newOrder =
-                                                    await confirmOrder(
-                                                        order.id
-                                                    );
-                                                const oldData = [...orderData];
-                                                const newData = oldData.map(
-                                                    (order: any) => {
-                                                        return order.id ==
-                                                            newOrder.id
-                                                            ? newOrder
-                                                            : order;
-                                                    }
-                                                );
-                                                const newState = [
-                                                    newOrder,
-                                                    ...newData,
-                                                ];
-                                                setOrderData(newData);
-                                            }}
-                                        >
-                                            Confirm
-                                        </Button>
-                                    ) : order.status == "READY" ? (
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <Button
-                                                    onClick={async () => {
-                                                        const riders =
-                                                            await getRiders(
-                                                                "ON_DUTY"
-                                                            );
-                                                        setRiderOptions(riders);
-                                                    }}
-                                                >
-                                                    Assign
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                                {riderOptions ? (
-                                                    <div>
-                                                        {riderOptions.map(
-                                                            (rider: any) => {
-                                                                return (
-                                                                    <span>
-                                                                        <div>
-                                                                            {
-                                                                                rider.name
-                                                                            }
-                                                                        </div>
-                                                                        <Button
-                                                                            onClick={async () => {
-                                                                                const newOrder =
-                                                                                    await assignOrder(
-                                                                                        order.id,
-                                                                                        rider.id
-                                                                                    );
-                                                                                const oldData =
-                                                                                    [
-                                                                                        ...orderData,
-                                                                                    ];
-                                                                                const newData =
-                                                                                    oldData.map(
-                                                                                        (
-                                                                                            order: any
-                                                                                        ) => {
-                                                                                            return order.id ==
-                                                                                                newOrder.id
-                                                                                                ? newOrder
-                                                                                                : order;
-                                                                                        }
-                                                                                    );
-                                                                                setOrderData(
-                                                                                    newData
-                                                                                );
-                                                                                setRiderOptions(
-                                                                                    null
-                                                                                );
-                                                                            }}
-                                                                        >
-                                                                            Assign
-                                                                        </Button>
-                                                                    </span>
-                                                                );
-                                                            }
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <div>List of Riders</div>
-                                                )}
-                                            </DialogContent>
-                                        </Dialog>
-                                    ) : order.status == "ASSIGNED" ||
-                                      order.status == "DELIVERING" ? (
-                                        <Button
-                                            onClick={async () => {
-                                                const newOrder =
-                                                    await completeOrder(
-                                                        order.id
-                                                    );
-                                                const oldData = [...orderData];
-                                                const newData = oldData.map(
-                                                    (order: any) => {
-                                                        return order.id ==
-                                                            newOrder.id
-                                                            ? newOrder
-                                                            : order;
-                                                    }
-                                                );
-                                                setOrderData(newData);
-                                            }}
-                                        >
-                                            Complete
-                                        </Button>
-                                    ) : order.status == "COMPLETE" ? (
-                                        <>---</>
-                                    ) : (
-                                        <>---</>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                        );
-                    })}
-                </TableBody>
-            </Table>
+            <Tabs defaultValue="account" className="">
+                <TabsList>
+                    <TabsTrigger value="Order List">Order List</TabsTrigger>
+                    <TabsTrigger value="Inventory">Inventory</TabsTrigger>
+                </TabsList>
+                <TabsContent value="Order List">
+                    {OrderList(
+                        orderData,
+                        setOrderData,
+                        riderOptions,
+                        setRiderOptions
+                    )}
+                </TabsContent>
+                <TabsContent value="inventory">
+                    Change your password here.
+                </TabsContent>
+            </Tabs>
         </>
     ) : (
         <>Loading...</>
