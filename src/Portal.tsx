@@ -29,6 +29,36 @@ async function confirmOrder(orderId: string) {
     return order;
 }
 
+function InventoryPage(inventoryData: any) {
+    return (
+        <>
+            <Table>
+                <TableCaption>List of Products</TableCaption>
+                <TableHeader>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Quantity</TableHead>
+                    <TableHead></TableHead>
+                    <TableHead></TableHead>
+                    <TableHead></TableHead>
+                </TableHeader>
+                <TableBody>
+                    {inventoryData.map((entry: any) => {
+                        return (
+                            <TableRow key={entry.id}>
+                                <TableCell>{entry.product.name}</TableCell>
+                                <TableCell>{entry.quantity}</TableCell>
+                                <TableCell></TableCell>
+                                <TableCell></TableCell>
+                                <TableCell></TableCell>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+        </>
+    );
+}
+
 function OrderList(
     orderData: any,
     setOrderData: Function,
@@ -195,6 +225,7 @@ function Portal() {
     const [storeId, setStoreId] = useState<string | null>(null);
     const [storeOptions, setStoreOptions] = useState<any>(null);
     const [riderOptions, setRiderOptions] = useState<any>(null);
+    const [inventoryData, setInventoryData] = useState<any>(null);
     const [tab, setTab] = useState("Order List");
 
     const tabs = ["Order List", "Order Map", "Inventory", "Riders"];
@@ -210,7 +241,7 @@ function Portal() {
 
     useEffect(() => {
         if (storeId) {
-            const getData = async () => {
+            const getOrderData = async () => {
                 const res = await fetch(
                     "http://localhost:8080/orders?" +
                         new URLSearchParams({ storeId: storeId })
@@ -218,7 +249,16 @@ function Portal() {
                 const orders = await res.json();
                 setOrderData(orders);
             };
-            getData();
+            const getInventoryData = async () => {
+                const res = await fetch(
+                    `http://localhost:8080/inventory?` +
+                        new URLSearchParams({ storeId: storeId })
+                );
+                const inventory = await res.json();
+                setInventoryData(inventory);
+            };
+            getOrderData();
+            getInventoryData();
         }
     }, [storeId]);
 
@@ -250,7 +290,7 @@ function Portal() {
             >
                 Back
             </Button>
-            <Tabs defaultValue="account" className="">
+            <Tabs defaultValue="Order List" className="">
                 <TabsList>
                     <TabsTrigger value="Order List">Order List</TabsTrigger>
                     <TabsTrigger value="Inventory">Inventory</TabsTrigger>
@@ -263,8 +303,8 @@ function Portal() {
                         setRiderOptions
                     )}
                 </TabsContent>
-                <TabsContent value="inventory">
-                    Change your password here.
+                <TabsContent value="Inventory">
+                    {InventoryPage(inventoryData)}
                 </TabsContent>
             </Tabs>
         </>
