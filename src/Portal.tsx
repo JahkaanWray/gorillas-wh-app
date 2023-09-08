@@ -29,6 +29,41 @@ async function confirmOrder(orderId: string) {
     return order;
 }
 
+function UserPage(userData: any) {
+    return (
+        <>
+            {userData.map((user: any) => {
+                return (
+                    <div>
+                        {user.name}, {user.role}
+                    </div>
+                );
+            })}
+        </>
+    );
+}
+
+function RiderPage(riderData: any) {
+    return (
+        <>
+            {riderData.map((rider: any) => {
+                return <div>{rider.name}</div>;
+            })}
+        </>
+    );
+}
+
+function StorePage(storeData: any) {
+    console.log(storeData);
+    return (
+        <>
+            {storeData.map((store: any) => {
+                return <div>{store.name}</div>;
+            })}
+        </>
+    );
+}
+
 function InventoryPage(inventoryData: any) {
     return (
         <>
@@ -226,6 +261,9 @@ function Portal() {
     const [storeOptions, setStoreOptions] = useState<any>(null);
     const [riderOptions, setRiderOptions] = useState<any>(null);
     const [inventoryData, setInventoryData] = useState<any>(null);
+    const [userData, setUserData] = useState<any>(null);
+    const [riderData, setRiderData] = useState<any>(null);
+    const [storeData, setStoreData] = useState<any>(null);
     const [tab, setTab] = useState("Order List");
 
     const tabs = ["Order List", "Order Map", "Inventory", "Riders"];
@@ -257,8 +295,26 @@ function Portal() {
                 const inventory = await res.json();
                 setInventoryData(inventory);
             };
+            const getUserData = async () => {
+                const res = await fetch(`http://localhost:8080/users`);
+                const users = await res.json();
+                setUserData(users);
+            };
+            const getRiderData = async () => {
+                const res = await fetch(`http://localhost:8080/riders`);
+                const riders = await res.json();
+                setRiderData(riders);
+            };
+            const getStoreData = async () => {
+                const res = await fetch(`http://localhost:8080/stores`);
+                const stores = await res.json();
+                setStoreData(stores);
+            };
             getOrderData();
             getInventoryData();
+            getUserData();
+            getRiderData();
+            getStoreData();
         }
     }, [storeId]);
 
@@ -281,7 +337,7 @@ function Portal() {
                 })}
             </SelectContent>
         </Select>
-    ) : orderData ? (
+    ) : orderData && storeData ? (
         <>
             <Button
                 onClick={() => {
@@ -294,6 +350,10 @@ function Portal() {
                 <TabsList>
                     <TabsTrigger value="Order List">Order List</TabsTrigger>
                     <TabsTrigger value="Inventory">Inventory</TabsTrigger>
+                    <TabsTrigger value="Riders">Riders</TabsTrigger>
+                    <TabsTrigger value="Users">Users</TabsTrigger>
+                    <TabsTrigger value="Stores">Stores</TabsTrigger>
+                    <TabsTrigger value="Incidents">Incidents</TabsTrigger>
                 </TabsList>
                 <TabsContent value="Order List">
                     {OrderList(
@@ -305,6 +365,16 @@ function Portal() {
                 </TabsContent>
                 <TabsContent value="Inventory">
                     {InventoryPage(inventoryData)}
+                </TabsContent>
+                <TabsContent value="Users">
+                    <>Pabe to view and edit users{UserPage(userData)}</>
+                </TabsContent>
+                <TabsContent value="Riders">
+                    <>Page to view and edit riders{RiderPage(riderData)}</>
+                </TabsContent>
+                <TabsContent value="Stores">{StorePage(storeData)}</TabsContent>
+                <TabsContent value="Incidents">
+                    Page to view and edit incidents
                 </TabsContent>
             </Tabs>
         </>
