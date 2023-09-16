@@ -391,7 +391,10 @@ function Portal() {
             const getOrderData = async () => {
                 const res = await fetch(
                     "http://localhost:8080/orders?" +
-                        new URLSearchParams({ storeId: storeId })
+                        new URLSearchParams({
+                            storeId: storeId,
+                            recordsPerPage: "5",
+                        })
                 );
                 const orders = await res.json();
                 setOrderData(orders);
