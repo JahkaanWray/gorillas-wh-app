@@ -106,8 +106,12 @@ function OrderList(
             <TableHeader>
                 <TableHead>Customer</TableHead>
                 <TableHead>Address</TableHead>
+                <TableHead>Store</TableHead>
                 <TableHead>Items</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Rider</TableHead>
+                <TableHead>Created On</TableHead>
+                <TableHead></TableHead>
                 <TableHead></TableHead>
             </TableHeader>
             <TableBody>
@@ -117,6 +121,7 @@ function OrderList(
                         <TableRow key={order.id}>
                             <TableCell>{order.customer.name}</TableCell>
                             <TableCell>{order.address.line1}</TableCell>
+                            <TableCell>{order.store.name}</TableCell>
                             <TableCell>
                                 {order.orderDetails.reduce(
                                     (acc: number, detail: any) =>
@@ -125,6 +130,10 @@ function OrderList(
                                 )}
                             </TableCell>
                             <TableCell>{order.status}</TableCell>
+                            <TableCell>
+                                {order.rider ? order.rider.name : "---"}
+                            </TableCell>
+                            <TableCell>{order.createdOn}</TableCell>
                             <TableCell>
                                 {order.status == "NEW" ? (
                                     <Button>View Order</Button>
@@ -247,6 +256,7 @@ function OrderList(
                                     <>---</>
                                 )}
                             </TableCell>
+                            <TableCell></TableCell>
                         </TableRow>
                     );
                 })}
