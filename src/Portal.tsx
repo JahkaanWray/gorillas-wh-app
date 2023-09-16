@@ -189,7 +189,8 @@ function OrderList(
     orderData: Order[],
     setOrderData: Function,
     riderOptions: Rider[],
-    setRiderOptions: Function
+    setRiderOptions: Function,
+    setCurrentOrder: Function
 ) {
     return (
         <Table>
@@ -227,7 +228,13 @@ function OrderList(
                             <TableCell>{order.createdOn}</TableCell>
                             <TableCell>
                                 {order.status == "NEW" ? (
-                                    <Button>View Order</Button>
+                                    <Button
+                                        onClick={() => {
+                                            setCurrentOrder(order);
+                                        }}
+                                    >
+                                        View Order
+                                    </Button>
                                 ) : order.status == "PROCESSING" ? (
                                     <Button
                                         onClick={async () => {
@@ -365,6 +372,7 @@ function Portal() {
     const [userData, setUserData] = useState<User[]>([]);
     const [riderData, setRiderData] = useState<Rider[]>([]);
     const [storeData, setStoreData] = useState<Store[]>([]);
+    const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
     const [tab, setTab] = useState("Order List");
 
     const tabs = ["Order List", "Order Map", "Inventory", "Riders"];
@@ -438,6 +446,17 @@ function Portal() {
                 })}
             </SelectContent>
         </Select>
+    ) : currentOrder ? (
+        <>
+            <Button
+                onClick={() => {
+                    setCurrentOrder(null);
+                }}
+            >
+                Back
+            </Button>
+            <div>{currentOrder.id}</div>
+        </>
     ) : orderData && storeData ? (
         <>
             <Button
@@ -461,7 +480,8 @@ function Portal() {
                         orderData,
                         setOrderData,
                         riderOptions,
-                        setRiderOptions
+                        setRiderOptions,
+                        setCurrentOrder
                     )}
                 </TabsContent>
                 <TabsContent value="Inventory">

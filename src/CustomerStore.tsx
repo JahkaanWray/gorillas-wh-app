@@ -19,12 +19,11 @@ function Product(
         const { ...newCart } = cart;
         const max = entry.quantity;
         console.log(newCart[entry.productId]);
-        newCart[entry.productId] =
-            newCart[entry.productId] != null
-                ? newCart[entry.productId] >= max
-                    ? max
-                    : newCart[entry.productId] + 1
-                : 1;
+        newCart[entry.productId] = newCart[entry.productId]
+            ? newCart[entry.productId] >= max
+                ? max
+                : newCart[entry.productId] + 1
+            : 1;
         setCart(newCart);
         console.log(cart);
         ws.send(JSON.stringify({ msg: "Cart Update", cart: cart }));
