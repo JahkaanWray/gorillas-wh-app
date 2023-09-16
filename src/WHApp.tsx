@@ -91,11 +91,11 @@ function WHApp() {
     useEffect(() => {
         if (storeId) {
             const fetchData = async () => {
-                const orders = await getOrders({
+                const result = await getOrders({
                     storeId: storeId,
                     status: "NEW",
                 });
-                setData(orders);
+                setData(result.items);
             };
             fetchData();
         }
@@ -177,11 +177,11 @@ function WHApp() {
                     variant="default"
                     onClick={async () => {
                         await unpickOrder(order.id);
-                        const orders = await getOrders({
+                        const result = await getOrders({
                             status: "NEW",
                             storeId: storeId,
                         });
-                        setData(orders);
+                        setData(result.items);
                         setCurrentOrder(null);
                     }}
                 >
@@ -191,11 +191,11 @@ function WHApp() {
                     variant="outline"
                     onClick={async () => {
                         await confirmOrder(order.id);
-                        const orders = await getOrders({
+                        const result = await getOrders({
                             status: "NEW",
                             storeId: storeId,
                         });
-                        setData(orders);
+                        setData(result.items);
                         setCurrentOrder(null);
                     }}
                 >

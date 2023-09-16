@@ -186,7 +186,7 @@ function InventoryPage(inventoryData: InventoryEntry[]) {
 }
 
 function OrderList(
-    orderData: Order[],
+    orderData: OrderData,
     setOrderData: Function,
     riderOptions: Rider[],
     setRiderOptions: Function,
@@ -207,7 +207,7 @@ function OrderList(
                 <TableHead></TableHead>
             </TableHeader>
             <TableBody>
-                {orderData.map((order) => {
+                {orderData.items.map((order) => {
                     console.log(order);
                     return (
                         <TableRow key={order.id}>
@@ -241,8 +241,11 @@ function OrderList(
                                             const newOrder = await confirmOrder(
                                                 order.id
                                             );
-                                            const oldData = [...orderData];
-                                            const newData = oldData.map(
+                                            const oldState = { ...orderData };
+                                            const oldOrders = [
+                                                ...orderData.items,
+                                            ];
+                                            const newOrders = oldOrders.map(
                                                 (order) => {
                                                     return order.id ==
                                                         newOrder.id
@@ -250,11 +253,8 @@ function OrderList(
                                                         : order;
                                                 }
                                             );
-                                            const newState = [
-                                                newOrder,
-                                                ...newData,
-                                            ];
-                                            setOrderData(newData);
+                                            oldState.items = newOrders;
+                                            setOrderData(oldState);
                                         }}
                                     >
                                         Confirm
@@ -293,9 +293,13 @@ function OrderList(
                                                                                     order.id,
                                                                                     rider.id
                                                                                 );
+                                                                            const newState =
+                                                                                {
+                                                                                    ...orderData,
+                                                                                };
                                                                             const oldData =
                                                                                 [
-                                                                                    ...orderData,
+                                                                                    ...orderData.items,
                                                                                 ];
                                                                             const newData =
                                                                                 oldData.map(
@@ -308,8 +312,10 @@ function OrderList(
                                                                                             : order;
                                                                                     }
                                                                                 );
+                                                                            newState.items =
+                                                                                newData;
                                                                             setOrderData(
-                                                                                newData
+                                                                                newState
                                                                             );
                                                                             setRiderOptions(
                                                                                 null
@@ -334,7 +340,10 @@ function OrderList(
                                         onClick={async () => {
                                             const newOrder =
                                                 await completeOrder(order.id);
-                                            const oldData = [...orderData];
+                                            const newState = { ...orderData };
+                                            const oldData = [
+                                                ...orderData.items,
+                                            ];
                                             const newData = oldData.map(
                                                 (order) => {
                                                     return order.id ==
@@ -343,7 +352,8 @@ function OrderList(
                                                         : order;
                                                 }
                                             );
-                                            setOrderData(newData);
+                                            newState.items = newData;
+                                            setOrderData(newState);
                                         }}
                                     >
                                         Complete
@@ -363,8 +373,16 @@ function OrderList(
     );
 }
 
+type OrderData = {
+    items: Order[];
+    recordsPerPage: number;
+    pageNumber: number;
+    totalPages: number;
+    totalRecords: number;
+};
+
 function Portal() {
-    const [orderData, setOrderData] = useState<Order[] | null>(null);
+    const [orderData, setOrderData] = useState<OrderData | null>(null);
     const [storeId, setStoreId] = useState<string | null>(null);
     const [storeOptions, setStoreOptions] = useState<Store[]>([]);
     const [riderOptions, setRiderOptions] = useState<Rider[]>([]);
@@ -394,6 +412,8 @@ function Portal() {
                         new URLSearchParams({
                             storeId: storeId,
                             recordsPerPage: "5",
+                            sortBy: "createdOn",
+                            orderBy: "desc",
                         })
                 );
                 const orders = await res.json();
