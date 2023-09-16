@@ -21,6 +21,97 @@ import { Dialog, DialogTrigger, DialogContent } from "./components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { getRiders } from "./helperFunctions/riderFunctions";
 
+type OrderStatus =
+    | "NEW"
+    | "PROCESSING"
+    | "READY"
+    | "ASSIGNED"
+    | "DELIVERING"
+    | "COMPLETE"
+    | "CANCELLED";
+
+type OrderDetail = {
+    id: string;
+    quantity: number;
+    productId: string;
+};
+
+type Order = {
+    id: string;
+    storeId: string;
+    store: {
+        id: string;
+        name: string;
+    };
+    riderId: string;
+    pickerId: string;
+    customerId: string;
+    rider: {
+        id: string;
+        name: string;
+    };
+    picker: {
+        id: string;
+        name: string;
+    };
+    customer: {
+        id: string;
+        name: string;
+    };
+    createdOn: string;
+    pickedOn: string;
+    confirmedOn: string;
+    assignedOn: string;
+    startedOn: string;
+    completedOn: string;
+
+    addressId: string;
+    address: {
+        id: string;
+        line1: string;
+    };
+    status: OrderStatus;
+    orderDetails: OrderDetail[];
+};
+
+type User = {
+    id: string;
+    name: string;
+    role: Role;
+    createdOn: string;
+};
+
+type Role = "PICKER" | "SUPERVISOR" | "MANAGER" | "AREA_MANAGER" | "ADMIN";
+
+type Rider = {
+    id: string;
+    name: string;
+    storeId: string;
+    store: {
+        id: string;
+        name: string;
+    };
+    status: RiderStatus;
+};
+
+type RiderStatus = "ON_DUTY" | "OFF_DUTY" | "INACTIVE";
+
+type Store = {
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+};
+
+type InventoryEntry = {
+    id: string;
+    quantity: number;
+    productId: string;
+    product: {
+        id: string;
+        name: string;
+    };
+};
 async function confirmOrder(orderId: string) {
     const res = await fetch(`http://localhost:8080/orders/${orderId}/confirm`, {
         method: "POST",
@@ -29,10 +120,10 @@ async function confirmOrder(orderId: string) {
     return order;
 }
 
-function UserPage(userData: any) {
+function UserPage(userData: User[]) {
     return (
         <>
-            {userData.map((user: any) => {
+            {userData.map((user) => {
                 return (
                     <div>
                         {user.name}, {user.role}
@@ -43,28 +134,28 @@ function UserPage(userData: any) {
     );
 }
 
-function RiderPage(riderData: any) {
+function RiderPage(riderData: Rider[]) {
     return (
         <>
-            {riderData.map((rider: any) => {
+            {riderData.map((rider) => {
                 return <div>{rider.name}</div>;
             })}
         </>
     );
 }
 
-function StorePage(storeData: any) {
+function StorePage(storeData: Store[]) {
     console.log(storeData);
     return (
         <>
-            {storeData.map((store: any) => {
+            {storeData.map((store) => {
                 return <div>{store.name}</div>;
             })}
         </>
     );
 }
 
-function InventoryPage(inventoryData: any) {
+function InventoryPage(inventoryData: InventoryEntry[]) {
     return (
         <>
             <Table>
@@ -77,7 +168,7 @@ function InventoryPage(inventoryData: any) {
                     <TableHead></TableHead>
                 </TableHeader>
                 <TableBody>
-                    {inventoryData.map((entry: any) => {
+                    {inventoryData.map((entry) => {
                         return (
                             <TableRow key={entry.id}>
                                 <TableCell>{entry.product.name}</TableCell>
@@ -95,9 +186,9 @@ function InventoryPage(inventoryData: any) {
 }
 
 function OrderList(
-    orderData: any,
+    orderData: Order[],
     setOrderData: Function,
-    riderOptions: any,
+    riderOptions: Rider[],
     setRiderOptions: Function
 ) {
     return (
@@ -115,7 +206,7 @@ function OrderList(
                 <TableHead></TableHead>
             </TableHeader>
             <TableBody>
-                {orderData.map((order: any) => {
+                {orderData.map((order) => {
                     console.log(order);
                     return (
                         <TableRow key={order.id}>
@@ -124,7 +215,7 @@ function OrderList(
                             <TableCell>{order.store.name}</TableCell>
                             <TableCell>
                                 {order.orderDetails.reduce(
-                                    (acc: number, detail: any) =>
+                                    (acc: number, detail) =>
                                         acc + detail.quantity,
                                     0
                                 )}
@@ -145,7 +236,7 @@ function OrderList(
                                             );
                                             const oldData = [...orderData];
                                             const newData = oldData.map(
-                                                (order: any) => {
+                                                (order) => {
                                                     return order.id ==
                                                         newOrder.id
                                                         ? newOrder
@@ -180,7 +271,7 @@ function OrderList(
                                             {riderOptions ? (
                                                 <div>
                                                     {riderOptions.map(
-                                                        (rider: any) => {
+                                                        (rider) => {
                                                             return (
                                                                 <span>
                                                                     <div>
@@ -202,7 +293,7 @@ function OrderList(
                                                                             const newData =
                                                                                 oldData.map(
                                                                                     (
-                                                                                        order: any
+                                                                                        order
                                                                                     ) => {
                                                                                         return order.id ==
                                                                                             newOrder.id
@@ -238,7 +329,7 @@ function OrderList(
                                                 await completeOrder(order.id);
                                             const oldData = [...orderData];
                                             const newData = oldData.map(
-                                                (order: any) => {
+                                                (order) => {
                                                     return order.id ==
                                                         newOrder.id
                                                         ? newOrder
@@ -266,14 +357,14 @@ function OrderList(
 }
 
 function Portal() {
-    const [orderData, setOrderData] = useState<object[] | null>(null);
+    const [orderData, setOrderData] = useState<Order[] | null>(null);
     const [storeId, setStoreId] = useState<string | null>(null);
-    const [storeOptions, setStoreOptions] = useState<any>(null);
-    const [riderOptions, setRiderOptions] = useState<any>(null);
-    const [inventoryData, setInventoryData] = useState<any>(null);
-    const [userData, setUserData] = useState<any>(null);
-    const [riderData, setRiderData] = useState<any>(null);
-    const [storeData, setStoreData] = useState<any>(null);
+    const [storeOptions, setStoreOptions] = useState<Store[]>([]);
+    const [riderOptions, setRiderOptions] = useState<Rider[]>([]);
+    const [inventoryData, setInventoryData] = useState<InventoryEntry[]>([]);
+    const [userData, setUserData] = useState<User[]>([]);
+    const [riderData, setRiderData] = useState<Rider[]>([]);
+    const [storeData, setStoreData] = useState<Store[]>([]);
     const [tab, setTab] = useState("Order List");
 
     const tabs = ["Order List", "Order Map", "Inventory", "Riders"];
@@ -340,7 +431,7 @@ function Portal() {
                 <SelectValue placeholder="Select Store"></SelectValue>
             </SelectTrigger>
             <SelectContent>
-                {storeOptions.map((store: any) => {
+                {storeOptions.map((store) => {
                     return (
                         <SelectItem value={store.id}>{store.name}</SelectItem>
                     );
