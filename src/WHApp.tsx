@@ -18,8 +18,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "./components/ui/select";
+import { Order, User } from "./lib/types";
 
-function Order(order: any) {
+function OrderCard(order: any) {
     return (
         <>
             <Card className=" m-4 ">
@@ -65,10 +66,10 @@ function FullOrder(order: any) {
 }
 
 function WHApp() {
-    const [data, setData] = useState([] as any);
-    const [currentOrder, setCurrentOrder] = useState(null);
+    const [data, setData] = useState<Order[]>([]);
+    const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
     const [pickerId, setPickerId] = useState<string | null>(null);
-    const [pickerOptions, setPickerOptions] = useState<any | null>(null);
+    const [pickerOptions, setPickerOptions] = useState<User[] | null>(null);
     const [storeId, setStoreId] = useState<string | null>(null);
     const [ws, setWS] = useState<WebSocket>();
 
@@ -82,8 +83,8 @@ function WHApp() {
     useEffect(() => {
         if (!pickerId) {
             const fetchData = async () => {
-                const users = await getUsers();
-                setPickerOptions(users);
+                const users = await getUsers({});
+                setPickerOptions(users.items);
             };
             fetchData();
         }
@@ -92,8 +93,8 @@ function WHApp() {
         if (storeId) {
             const fetchData = async () => {
                 const result = await getOrders({
-                    storeId: storeId,
-                    status: "NEW",
+                    storeIds: [storeId],
+                    statuses: ["NEW"],
                 });
                 setData(result.items);
             };
@@ -142,7 +143,7 @@ function WHApp() {
     }
     console.log(data);
     const orderList = () => {
-        return data.map((order: any, index: number) => {
+        return data.map((order, index: number) => {
             return (
                 <li
                     key={index}
@@ -157,7 +158,7 @@ function WHApp() {
                     }}
                 >
                     {" "}
-                    {Order(order)}{" "}
+                    {OrderCard(order)}{" "}
                 </li>
             );
         });
@@ -178,8 +179,8 @@ function WHApp() {
                     onClick={async () => {
                         await unpickOrder(order.id);
                         const result = await getOrders({
-                            status: "NEW",
-                            storeId: storeId,
+                            statuses: ["NEW"],
+                            storeIds: [storeId],
                         });
                         setData(result.items);
                         setCurrentOrder(null);
@@ -192,8 +193,8 @@ function WHApp() {
                     onClick={async () => {
                         await confirmOrder(order.id);
                         const result = await getOrders({
-                            status: "NEW",
-                            storeId: storeId,
+                            statuses: ["NEW"],
+                            storeIds: [storeId],
                         });
                         setData(result.items);
                         setCurrentOrder(null);

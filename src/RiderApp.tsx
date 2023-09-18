@@ -15,7 +15,11 @@ import {
 } from "./components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
 import { Switch } from "./components/ui/switch";
-import { riderOffDuty, riderOnDuty } from "./helperFunctions/riderFunctions";
+import {
+    getRiders,
+    riderOffDuty,
+    riderOnDuty,
+} from "./helperFunctions/riderFunctions";
 import { Button } from "./components/ui/button";
 
 function RiderApp() {
@@ -28,12 +32,12 @@ function RiderApp() {
 
     useEffect(() => {
         const getData = async () => {
-            let res = await fetch(`http://localhost:8080/stores`);
+            const res = await fetch(`http://localhost:8080/stores`);
             const stores = await res.json();
-            res = await fetch(`http://localhost:8080/riders`);
-            const riders = await res.json();
+            const riders = await getRiders({});
+            const riderList = riders.items;
 
-            setRiderOptions({ stores, riders });
+            setRiderOptions({ stores, riders: riderList });
         };
 
         getData();
@@ -43,10 +47,10 @@ function RiderApp() {
         if (storeId) {
             const fetchData = async () => {
                 const orders = await getOrders({
-                    storeId: storeId,
-                    status: "READY",
+                    storeIds: [storeId],
+                    statuses: ["READY"],
                 });
-                setOrderList(orders);
+                setOrderList(orders.items);
             };
             fetchData();
         }

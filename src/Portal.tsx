@@ -25,6 +25,8 @@ import { Dialog, DialogTrigger, DialogContent } from "./components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { getRiders } from "./helperFunctions/riderFunctions";
 import { get } from "http";
+import { getInventoryEntries } from "./helperFunctions/inventoryFunctions";
+import { getUsers } from "./helperFunctions/userFunctions";
 
 type OrderStatus =
     | "NEW"
@@ -111,8 +113,13 @@ type Store = {
 type InventoryEntry = {
     id: string;
     quantity: number;
+    published: boolean;
     productId: string;
     product: {
+        id: string;
+        name: string;
+    };
+    store: {
         id: string;
         name: string;
     };
@@ -125,10 +132,10 @@ async function confirmOrder(orderId: string) {
     return order;
 }
 
-function UserPage(userData: User[]) {
+function UserPage(userData: UserData) {
     return (
         <>
-            {userData.map((user) => {
+            {userData.items.map((user) => {
                 return (
                     <div>
                         {user.name}, {user.role}
@@ -139,13 +146,15 @@ function UserPage(userData: User[]) {
     );
 }
 
-function RiderPage(riderData: Rider[]) {
-    return (
+function RiderPage(riderData: RiderData | null) {
+    return riderData ? (
         <>
-            {riderData.map((rider) => {
+            {riderData.items.map((rider) => {
                 return <div>{rider.name}</div>;
             })}
         </>
+    ) : (
+        <>Loading...</>
     );
 }
 
@@ -160,26 +169,28 @@ function StorePage(storeData: Store[]) {
     );
 }
 
-function InventoryPage(inventoryData: InventoryEntry[]) {
+function InventoryPage(inventoryData: InventoryData) {
     return (
         <>
             <Table>
                 <TableCaption>List of Products</TableCaption>
                 <TableHeader>
+                    <TableHead>Store</TableHead>
                     <TableHead>Product</TableHead>
                     <TableHead>Quantity</TableHead>
-                    <TableHead></TableHead>
-                    <TableHead></TableHead>
+                    <TableHead>Published</TableHead>
                     <TableHead></TableHead>
                 </TableHeader>
                 <TableBody>
-                    {inventoryData.map((entry) => {
+                    {inventoryData.items.map((entry) => {
                         return (
                             <TableRow key={entry.id}>
+                                <TableCell>{entry.store.name}</TableCell>
                                 <TableCell>{entry.product.name}</TableCell>
                                 <TableCell>{entry.quantity}</TableCell>
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
+                                <TableCell>
+                                    {entry.published ? "TRUE" : "FALSE"}
+                                </TableCell>
                                 <TableCell></TableCell>
                             </TableRow>
                         );
@@ -292,10 +303,14 @@ function OrderList(
                                                 <Button
                                                     onClick={async () => {
                                                         const riders =
-                                                            await getRiders(
-                                                                "ON_DUTY"
-                                                            );
-                                                        setRiderOptions(riders);
+                                                            await getRiders({
+                                                                statuses: [
+                                                                    "ON_DUTY",
+                                                                ],
+                                                            });
+                                                        setRiderOptions(
+                                                            riders.items
+                                                        );
                                                     }}
                                                 >
                                                     Assign
@@ -486,13 +501,16 @@ function OrderList(
     );
 }
 
-type OrderData = {
-    items: Order[];
+type ListReturnSchema<T> = {
+    items: T[];
     recordsPerPage: number;
     pageNumber: number;
     totalPages: number;
     totalRecords: number;
 };
+
+type OrderData = ListReturnSchema<Order>;
+type RiderData = ListReturnSchema<Rider>;
 
 type OrderFilters = {
     store: Record<string, Store & boolean>;
@@ -505,6 +523,9 @@ type OrderFilters = {
 type OrderSorting = {
     orderBy: "asc" | "desc";
 };
+
+type InventoryData = ListReturnSchema<InventoryEntry>;
+type UserData = ListReturnSchema<User>;
 
 function Portal() {
     const [orderData, setOrderData] = useState<OrderData | null>(null);
@@ -528,9 +549,11 @@ function Portal() {
     const [storeId, setStoreId] = useState<string | null>(null);
     const [storeOptions, setStoreOptions] = useState<Store[]>([]);
     const [riderOptions, setRiderOptions] = useState<Rider[]>([]);
-    const [inventoryData, setInventoryData] = useState<InventoryEntry[]>([]);
-    const [userData, setUserData] = useState<User[]>([]);
-    const [riderData, setRiderData] = useState<Rider[]>([]);
+    const [inventoryData, setInventoryData] = useState<InventoryData | null>(
+        null
+    );
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const [riderData, setRiderData] = useState<RiderData | null>(null);
     const [storeData, setStoreData] = useState<Store[]>([]);
     const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
     const [tab, setTab] = useState("Order List");
@@ -559,16 +582,11 @@ function Portal() {
                 setOrderData(orders);
             };
             const getInventoryData = async () => {
-                const res = await fetch(
-                    `http://localhost:8080/inventory?` +
-                        new URLSearchParams({ storeId: storeId })
-                );
-                const inventory = await res.json();
+                const inventory = await getInventoryEntries({});
                 setInventoryData(inventory);
             };
             const getUserData = async () => {
-                const res = await fetch(`http://localhost:8080/users`);
-                const users = await res.json();
+                const users = await getUsers({});
                 setUserData(users);
             };
             const getRiderData = async () => {
@@ -647,10 +665,14 @@ function Portal() {
                     )}
                 </TabsContent>
                 <TabsContent value="Inventory">
-                    {InventoryPage(inventoryData)}
+                    {inventoryData ? (
+                        InventoryPage(inventoryData)
+                    ) : (
+                        <>Loading...</>
+                    )}
                 </TabsContent>
                 <TabsContent value="Users">
-                    <>Pabe to view and edit users{UserPage(userData)}</>
+                    {userData ? UserPage(userData) : <>Loading...</>}
                 </TabsContent>
                 <TabsContent value="Riders">
                     <>Page to view and edit riders{RiderPage(riderData)}</>
