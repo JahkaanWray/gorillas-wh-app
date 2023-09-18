@@ -119,10 +119,10 @@ function RiderApp() {
                 onClick={async () => {
                     await unassignOrder(currentOrder.id);
                     const orders = await getOrders({
-                        storeId: storeId,
-                        status: "READY",
+                        storeIds: [storeId],
+                        statuses: ["READY"],
                     });
-                    setOrderList(orders);
+                    setOrderList(orders.items);
                     setCurrentOrder(null);
                 }}
             >
@@ -144,10 +144,10 @@ function RiderApp() {
                 onClick={async () => {
                     await completeOrder(currentOrder.id);
                     const orders = await getOrders({
-                        storeId: storeId,
-                        status: "READY",
+                        storeIds: [storeId],
+                        statuses: ["READY"],
                     });
-                    setOrderList(orders);
+                    setOrderList(orders.items);
                     setCurrentOrder(null);
                 }}
             >
@@ -157,10 +157,10 @@ function RiderApp() {
                 onClick={async () => {
                     await cancelOrder(currentOrder.id);
                     const orders = await getOrders({
-                        storeId: storeId,
-                        status: "READY",
+                        storeIds: [storeId],
+                        statuses: ["READY"],
                     });
-                    setOrderList(orders);
+                    setOrderList(orders.items);
                     setCurrentOrder(null);
                 }}
             >

@@ -125,7 +125,7 @@ function WHApp() {
                 setData(newData);
                 console.log(data);
             } else if (eventData.msg == "Cart Update") {
-                const orderDetails = Object.keys(eventData.cart).map((id) => {
+                /*const orderDetails = Object.keys(eventData.cart).map((id) => {
                     return { id: id, quantity: eventData.cart[id] };
                 });
                 console.log(orderDetails);
@@ -136,7 +136,7 @@ function WHApp() {
                 const newData = [...data, order];
                 console.log(newData);
                 setData(newData);
-                console.log(data);
+                console.log(data);*/
             }
             console.log(data);
         };

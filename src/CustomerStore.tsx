@@ -7,6 +7,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "./components/ui/select";
+import { getInventoryEntries } from "./helperFunctions/inventoryFunctions";
+import { findNearestStore } from "./helperFunctions/storeFunctions";
 
 function Product(
     entry: any,
@@ -72,13 +74,10 @@ function CustomerStore() {
     useEffect(() => {
         if (storeId) {
             const getData = async () => {
-                let res = await fetch(
-                    `http://localhost:8080/inventory?` +
-                        new URLSearchParams({ storeId: storeId }),
-                    {}
-                );
-                const items = await res.json();
-                setProductData(items);
+                const inventory = await getInventoryEntries({
+                    storeIds: [storeId],
+                });
+                setProductData(inventory.items);
             };
             getData();
         }
@@ -169,8 +168,16 @@ function CustomerStore() {
                 <></>
             ) : (
                 <Select
-                    onValueChange={(value) => {
-                        setAddressId(value);
+                    onValueChange={async (value) => {
+                        const address = JSON.parse(value);
+                        setAddressId(address.id);
+                        console.log(address);
+                        const closestStore = await findNearestStore({
+                            latitude: address.latitude,
+                            longitude: address.longitude,
+                        });
+                        console.log(closestStore);
+                        setStoreId(closestStore.id);
                     }}
                 >
                     <SelectTrigger>
@@ -179,7 +186,7 @@ function CustomerStore() {
                     <SelectContent>
                         {customerOptions.addresses.map((address: any) => {
                             return (
-                                <SelectItem value={address.id}>
+                                <SelectItem value={JSON.stringify(address)}>
                                     {address.line1}
                                 </SelectItem>
                             );
