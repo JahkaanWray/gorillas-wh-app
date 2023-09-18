@@ -58,12 +58,13 @@ export async function unpickOrder(orderId: string) {
 }
 
 export async function getOrders(params: any) {
-    const res = await fetch(
-        `http://localhost:8080/orders` + "?" + new URLSearchParams(params),
-        {
-            method: "GET",
-        }
-    );
+    const res = await fetch(`http://localhost:8080/orders/list`, {
+        method: "POST",
+        body: JSON.stringify(params),
+        headers: {
+            "content-type": "application/json",
+        },
+    });
     const data = await res.json();
     return data;
 }

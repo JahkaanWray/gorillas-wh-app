@@ -200,6 +200,23 @@ function OrderList(
 ) {
     return (
         <>
+            <Select>
+                <SelectTrigger>
+                    <SelectValue>Sort By</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="createdOn">Created On</SelectItem>
+                </SelectContent>
+            </Select>
+            <Select>
+                <SelectTrigger>
+                    <SelectValue>Order By</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="asc">ASC</SelectItem>
+                    <SelectItem value="desc">DESC</SelectItem>
+                </SelectContent>
+            </Select>
             <Table>
                 <TableCaption>List of Orders</TableCaption>
                 <TableHeader>
@@ -399,8 +416,8 @@ function OrderList(
                 <Button
                     onClick={async () => {
                         const orders = await getOrders({
-                            storeId: storeId,
-                            recordsPerPage: "5",
+                            storeIds: [storeId],
+                            recordsPerPage: 5,
                             pageNumber: 1,
                             sortBy: "createdOn",
                             orderBy: "desc",
@@ -417,8 +434,8 @@ function OrderList(
                             --orderData.pageNumber
                         );
                         const orders = await getOrders({
-                            storeId: storeId,
-                            recordsPerPage: "5",
+                            storeIds: [storeId],
+                            recordsPerPage: 5,
                             pageNumber: previousPage,
                             sortBy: "createdOn",
                             orderBy: "desc",
@@ -439,8 +456,8 @@ function OrderList(
                             orderData.totalPages
                         );
                         const orders = await getOrders({
-                            storeId: storeId,
-                            recordsPerPage: "5",
+                            storeIds: [storeId],
+                            recordsPerPage: 5,
                             pageNumber: nextPage,
                             sortBy: "createdOn",
                             orderBy: "desc",
@@ -453,8 +470,8 @@ function OrderList(
                 <Button
                     onClick={async () => {
                         const orders = await getOrders({
-                            storeId: storeId,
-                            recordsPerPage: "5",
+                            storeIds: [storeId],
+                            recordsPerPage: 5,
                             pageNumber: orderData.totalPages,
                             sortBy: "createdOn",
                             orderBy: "desc",
@@ -477,8 +494,37 @@ type OrderData = {
     totalRecords: number;
 };
 
+type OrderFilters = {
+    store: Record<string, Store & boolean>;
+    status: Record<OrderStatus, boolean>;
+    rider: Record<string, Rider & boolean>;
+    createdBefore?: string;
+    createdAfter?: string;
+};
+
+type OrderSorting = {
+    orderBy: "asc" | "desc";
+};
+
 function Portal() {
     const [orderData, setOrderData] = useState<OrderData | null>(null);
+    const [orderFilters, setOrderFilters] = useState<OrderFilters>({
+        store: {},
+        status: {
+            NEW: false,
+            PROCESSING: false,
+            READY: false,
+            ASSIGNED: false,
+            DELIVERING: false,
+            COMPLETE: false,
+            CANCELLED: false,
+        },
+        rider: {},
+    });
+    const [orderSorting, setOrderSorting] = useState<OrderSorting>({
+        orderBy: "desc",
+    });
+    const [orderSearchQuery, setOrderSearchQuery] = useState<string>("");
     const [storeId, setStoreId] = useState<string | null>(null);
     const [storeOptions, setStoreOptions] = useState<Store[]>([]);
     const [riderOptions, setRiderOptions] = useState<Rider[]>([]);
@@ -504,9 +550,9 @@ function Portal() {
         if (storeId) {
             const getOrderData = async () => {
                 const orders = await getOrders({
-                    storeId: storeId,
-                    recordsPerPage: "5",
-                    pageNumber: "1",
+                    storeIds: [storeId],
+                    recordsPerPage: 5,
+                    pageNumber: 1,
                     sortBy: "createdOn",
                     orderBy: "desc",
                 });
@@ -526,8 +572,7 @@ function Portal() {
                 setUserData(users);
             };
             const getRiderData = async () => {
-                const res = await fetch(`http://localhost:8080/riders`);
-                const riders = await res.json();
+                const riders = await getRiders({ statuses: ["ON_DUTY"] });
                 setRiderData(riders);
             };
             const getStoreData = async () => {

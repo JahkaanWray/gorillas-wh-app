@@ -22,8 +22,14 @@ export async function riderOffDuty(riderId: string) {
     return rider;
 }
 
-export async function getRiders(status: string) {
-    const res = await fetch(`http://localhost:8080/riders?status=${status}`);
+export async function getRiders(requestBody: any) {
+    const res = await fetch(`http://localhost:8080/riders/list`, {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+        headers: {
+            "content-type": "application/json",
+        },
+    });
     const riders = await res.json();
     return riders;
 }
