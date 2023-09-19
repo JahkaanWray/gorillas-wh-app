@@ -44,7 +44,6 @@ export function InventoryEditForm({ entry }: { entry: InventoryEntry }) {
                 <Label>Published</Label>
                 <Button
                     onClick={async () => {
-                        const requestBody = {};
                         await editInventoryEntry({
                             storeId: entry.store.id,
                             productId: entry.productId,
