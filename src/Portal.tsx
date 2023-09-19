@@ -11,9 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Order, Store } from "./lib/types";
 import { OrderPage } from "./components/portal/Order/OrderPage";
 import { UserPage } from "./components/portal/UserPage";
-import { InventoryPage } from "./components/portal/inventoryPage";
+import { InventoryPage } from "./components/portal/Inventory/inventoryPage";
 import { StorePage } from "./components/portal/StorePage";
-import { RiderPage } from "./components/portal/RiderPage";
+import { RiderPage } from "./components/portal/Rider/RiderPage";
 import { getStores } from "./helperFunctions/storeFunctions";
 
 function Portal() {
