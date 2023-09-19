@@ -7,40 +7,25 @@ import {
     SelectContent,
     SelectItem,
 } from "./components/ui/select";
-import { getOrders } from "./helperFunctions/orderFunctions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
-import { getRiders } from "./helperFunctions/riderFunctions";
-import { getInventoryEntries } from "./helperFunctions/inventoryFunctions";
-import { getUsers } from "./helperFunctions/userFunctions";
-import {
-    InventoryData,
-    Order,
-    OrderData,
-    OrderFilters,
-    OrderSorting,
-    Rider,
-    RiderData,
-    Store,
-    UserData,
-} from "./lib/types";
+import { Order, Store } from "./lib/types";
 import { OrderPage } from "./components/portal/OrderPage";
 import { UserPage } from "./components/portal/UserPage";
 import { InventoryPage } from "./components/portal/inventoryPage";
 import { StorePage } from "./components/portal/StorePage";
 import { RiderPage } from "./components/portal/RiderPage";
+import { getStores } from "./helperFunctions/storeFunctions";
 
 function Portal() {
     const [storeId, setStoreId] = useState<string | null>(null);
     const [storeOptions, setStoreOptions] = useState<Store[]>([]);
-    const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
     const [tab, setTab] = useState("Order List");
 
     const tabs = ["Order List", "Order Map", "Inventory", "Riders"];
 
     useEffect(() => {
         const getData = async () => {
-            const res = await fetch("http://localhost:8080/stores");
-            const data = await res.json();
+            const data = await getStores({});
             setStoreOptions(data);
         };
         getData();
@@ -65,17 +50,6 @@ function Portal() {
                 })}
             </SelectContent>
         </Select>
-    ) : currentOrder ? (
-        <>
-            <Button
-                onClick={() => {
-                    setCurrentOrder(null);
-                }}
-            >
-                Back
-            </Button>
-            <div>{currentOrder.id}</div>
-        </>
     ) : (
         <>
             <Button
