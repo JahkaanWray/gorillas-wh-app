@@ -33,3 +33,15 @@ export async function getRiders(requestBody: any) {
     const riders = await res.json();
     return riders;
 }
+
+export async function editRider(riderId: string, requestBody: any) {
+    const res = await fetch(`http://localhost:8080/riders/${riderId}`, {
+        method: "PUT",
+        body: requestBody,
+        headers: {
+            "content-type": "application/json",
+        },
+    });
+    const rider = await res.json();
+    return rider;
+}
