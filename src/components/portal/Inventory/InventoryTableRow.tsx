@@ -5,6 +5,7 @@ import { SheetTrigger, SheetContent, Sheet } from "../../ui/sheet";
 import { TableRow, TableCell } from "../../ui/table";
 import { Label } from "../../ui/label";
 import { Checkbox } from "../../ui/checkbox";
+import { InventoryEditForm } from "./InventoryEditForm";
 
 export function InventoryTableRow({ entry }: { entry: InventoryEntry }) {
     return (
@@ -14,21 +15,7 @@ export function InventoryTableRow({ entry }: { entry: InventoryEntry }) {
             <TableCell>{entry.quantity}</TableCell>
             <TableCell>{entry.published ? "TRUE" : "FALSE"}</TableCell>
             <TableCell>
-                <Sheet>
-                    <SheetTrigger>
-                        <Button>Edit</Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                        <Label>Quantity</Label>
-                        <Input
-                            type="text"
-                            placeholder={entry.quantity.toString()}
-                        ></Input>
-                        <Checkbox checked={entry.published}></Checkbox>
-                        <Label>Published</Label>
-                        <Button>Confirm</Button>
-                    </SheetContent>
-                </Sheet>
+                <InventoryEditForm entry={entry} />
             </TableCell>
         </TableRow>
     );

@@ -1,13 +1,4 @@
 import { RiderData } from "@/src/lib/types";
-import { Button } from "../../ui/button";
-import {
-    TableHeader,
-    TableHead,
-    TableBody,
-    TableRow,
-    TableCell,
-    Table,
-} from "../../ui/table";
 import { useEffect, useState } from "react";
 import { getRiders } from "../../../helperFunctions/riderFunctions";
 import { RiderTable } from "./RiderTable";
