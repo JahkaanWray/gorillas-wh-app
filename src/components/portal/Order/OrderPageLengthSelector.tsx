@@ -4,7 +4,7 @@ import {
     SelectValue,
     SelectContent,
     SelectItem,
-} from "../ui/select";
+} from "../../ui/select";
 
 export function OrderPageLengthSelector() {
     return (

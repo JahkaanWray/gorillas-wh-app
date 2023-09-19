@@ -1,6 +1,6 @@
 import { Order, OrderData, Rider } from "@/src/lib/types";
-import { getOrders } from "../../helperFunctions/orderFunctions";
-import { Button } from "../ui/button";
+import { getOrders } from "../../../helperFunctions/orderFunctions";
+import { Button } from "../../ui/button";
 import { useEffect, useState } from "react";
 import { OrderTable } from "./OrderTable";
 import { OrderPageLengthSelector } from "./OrderPageLengthSelector";

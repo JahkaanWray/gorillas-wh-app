@@ -1,6 +1,6 @@
 import { OrderData } from "@/src/lib/types";
-import { getOrders } from "../../helperFunctions/orderFunctions";
-import { Button } from "../ui/button";
+import { getOrders } from "../../../helperFunctions/orderFunctions";
+import { Button } from "../../ui/button";
 
 export function OrderPageSelector({
     storeId,

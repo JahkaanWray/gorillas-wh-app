@@ -9,7 +9,7 @@ import {
 } from "./components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Order, Store } from "./lib/types";
-import { OrderPage } from "./components/portal/OrderPage";
+import { OrderPage } from "./components/portal/Order/OrderPage";
 import { UserPage } from "./components/portal/UserPage";
 import { InventoryPage } from "./components/portal/inventoryPage";
 import { StorePage } from "./components/portal/StorePage";

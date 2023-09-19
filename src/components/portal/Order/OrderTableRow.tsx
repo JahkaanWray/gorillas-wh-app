@@ -2,12 +2,12 @@ import {
     confirmOrder,
     assignOrder,
     completeOrder,
-} from "../../helperFunctions/orderFunctions";
-import { getRiders } from "../../helperFunctions/riderFunctions";
+} from "../../../helperFunctions/orderFunctions";
+import { getRiders } from "../../../helperFunctions/riderFunctions";
 import { Order, OrderData, OrderDetail, Rider } from "@/src/lib/types";
-import { Button } from "../ui/button";
-import { TableRow, TableCell } from "../ui/table";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Button } from "../../ui/button";
+import { TableRow, TableCell } from "../../ui/table";
+import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
 
 export function OrderTableRow({
     order,

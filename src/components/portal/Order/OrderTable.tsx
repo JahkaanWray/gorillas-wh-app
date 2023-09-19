@@ -5,7 +5,7 @@ import {
     TableHead,
     TableBody,
     Table,
-} from "../ui/table";
+} from "../../ui/table";
 import { OrderTableRow } from "./OrderTableRow";
 
 export function sum(a: number, b: number) {
