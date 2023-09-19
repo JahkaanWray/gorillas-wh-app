@@ -2,6 +2,7 @@ import { Rider } from "@/src/lib/types";
 import { Button } from "../../ui/button";
 import { TableCell, TableRow } from "../../ui/table";
 import {
+    editRider,
     riderOffDuty,
     riderOnDuty,
 } from "../../../helperFunctions/riderFunctions";
@@ -35,7 +36,13 @@ export function RiderTableRow({ rider }: { rider: Rider }) {
                 )}
             </TableCell>
             <TableCell>
-                <Button>Edit Rider</Button>
+                <Button
+                    onClick={() => {
+                        editRider(rider.id, {});
+                    }}
+                >
+                    Edit Rider
+                </Button>
             </TableCell>
         </TableRow>
     );
