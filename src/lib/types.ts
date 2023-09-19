@@ -55,8 +55,21 @@ export type User = {
     id: string;
     name: string;
     role: Role;
+    team: Store;
+    stores: Store[];
     createdOn: string;
 };
+
+export type ListReturnSchema<T> = {
+    items: T[];
+    recordsPerPage: number;
+    pageNumber: number;
+    totalPages: number;
+    totalRecords: number;
+};
+
+export type OrderData = ListReturnSchema<Order>;
+export type RiderData = ListReturnSchema<Rider>;
 
 export type Role =
     | "PICKER"
@@ -99,3 +112,18 @@ export type InventoryEntry = {
         name: string;
     };
 };
+
+export type OrderFilters = {
+    store: Record<string, Store & boolean>;
+    status: Record<OrderStatus, boolean>;
+    rider: Record<string, Rider & boolean>;
+    createdBefore?: string;
+    createdAfter?: string;
+};
+
+export type OrderSorting = {
+    orderBy: "asc" | "desc";
+};
+
+export type InventoryData = ListReturnSchema<InventoryEntry>;
+export type UserData = ListReturnSchema<User>;
