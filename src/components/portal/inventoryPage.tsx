@@ -13,8 +13,30 @@ import {
 } from "../ui/table";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
+import { useEffect, useState } from "react";
+import { getInventoryEntries } from "../../helperFunctions/inventoryFunctions";
 
-export function InventoryPage(inventoryData: InventoryData) {
+function emptyInventoryData(): InventoryData {
+    return {
+        items: [],
+        recordsPerPage: 50,
+        pageNumber: 1,
+        totalPages: 1,
+        totalRecords: 0,
+    };
+}
+export function InventoryPage() {
+    const [inventoryData, setInventoryData] = useState<InventoryData>(
+        emptyInventoryData()
+    );
+
+    useEffect(() => {
+        const getInventoryData = async () => {
+            const inventory = await getInventoryEntries({});
+            setInventoryData(inventory);
+        };
+        getInventoryData();
+    }, []);
     return (
         <>
             <Table>

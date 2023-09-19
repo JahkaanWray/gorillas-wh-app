@@ -8,9 +8,19 @@ import {
     TableCell,
     Table,
 } from "../ui/table";
+import { useEffect, useState } from "react";
+import { getStores } from "../../helperFunctions/storeFunctions";
 
-export function StorePage(storeData: Store[]) {
-    console.log(storeData);
+export function StorePage() {
+    const [storeData, setStoreData] = useState<Store[]>([]);
+
+    useEffect(() => {
+        const getStoreData = async () => {
+            const stores = await getStores({});
+            setStoreData(stores);
+        };
+        getStoreData();
+    }, []);
     return (
         <>
             <Table>

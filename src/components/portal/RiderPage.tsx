@@ -8,8 +8,28 @@ import {
     TableCell,
     Table,
 } from "../ui/table";
+import { useEffect, useState } from "react";
+import { getRiders } from "../../helperFunctions/riderFunctions";
 
-export function RiderPage(riderData: RiderData | null) {
+function emptyRiderData(): RiderData {
+    return {
+        items: [],
+        recordsPerPage: 50,
+        pageNumber: 1,
+        totalPages: 1,
+        totalRecords: 0,
+    };
+}
+export function RiderPage() {
+    const [riderData, setRiderData] = useState<RiderData>(emptyRiderData());
+
+    useEffect(() => {
+        const getRiderData = async () => {
+            const riders = await getRiders({});
+            setRiderData(riders);
+        };
+        getRiderData();
+    }, []);
     return riderData ? (
         <>
             <Table>

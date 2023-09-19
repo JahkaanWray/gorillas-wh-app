@@ -1,4 +1,4 @@
-import { OrderData, OrderDetail, Rider } from "@/src/lib/types";
+import { Order, OrderData, OrderDetail, Rider } from "@/src/lib/types";
 import {
     Select,
     SelectContent,
@@ -11,10 +11,8 @@ import {
     assignOrder,
     completeOrder,
     getOrders,
-} from "@/src/helperFunctions/orderFunctions";
-import { getRiders } from "@/src/helperFunctions/riderFunctions";
-import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
-import { Table } from "lucide-react";
+} from "../../helperFunctions/orderFunctions";
+import { getRiders } from "../../helperFunctions/riderFunctions";
 import { Button } from "../ui/button";
 import {
     TableCaption,
@@ -23,16 +21,39 @@ import {
     TableBody,
     TableRow,
     TableCell,
+    Table,
 } from "../ui/table";
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 
-export function OrderList(
-    orderData: OrderData,
-    setOrderData: Function,
-    riderOptions: Rider[],
-    setRiderOptions: Function,
-    setCurrentOrder: Function,
-    storeId: string
-) {
+function emptyOrderData(): OrderData {
+    return {
+        items: [],
+        recordsPerPage: 50,
+        pageNumber: 1,
+        totalPages: 1,
+        totalRecords: 0,
+    };
+}
+
+export function OrderPage({ storeId }: { storeId: string }) {
+    const [orderData, setOrderData] = useState<OrderData>(emptyOrderData());
+    const [riderOptions, setRiderOptions] = useState<Rider[]>([]);
+    const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
+
+    useEffect(() => {
+        const getOrderData = async () => {
+            const orders = await getOrders({
+                storeIds: [storeId],
+                recordsPerPage: 5,
+                pageNumber: 1,
+                sortBy: "createdOn",
+                orderBy: "desc",
+            });
+            setOrderData(orders);
+        };
+        getOrderData();
+    }, []);
     return (
         <>
             <Select>
@@ -184,7 +205,7 @@ export function OrderList(
                                                                                     newState
                                                                                 );
                                                                                 setRiderOptions(
-                                                                                    null
+                                                                                    []
                                                                                 );
                                                                             }}
                                                                         >

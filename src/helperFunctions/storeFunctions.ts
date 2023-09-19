@@ -14,3 +14,9 @@ export async function findNearestStore(location: {
     const store = await res.json();
     return store;
 }
+
+export async function getStores(requestBody: any): Promise<Store[]> {
+    const res = await fetch(`http://localhost:8080/stores`);
+    const stores = await res.json();
+    return stores;
+}

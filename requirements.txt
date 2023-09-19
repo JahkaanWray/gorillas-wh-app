@@ -46,15 +46,31 @@ Customer App
 --Edit Cart
 --Send WS message when updating cart
 --Create Order
+
+
+
+
 Portal
 -Login Page
 --Select User
 -Order List Page
 --See list of orders
+    Order Row: Customer Name, Address, Store, Status, Rider, Created On, Price, No. of Items
 --Filter, sort and search orders
+    Filter by: 
+        Store, Status, Rider, createdOn
+    Sort by:
+        createdOn(asc, desc)
+    Search by Customer Name, orderId
+    Pagination
 --Update orders(confirm, assign, unassign, complete, cancel)
 --See individual order
 --Receive WS message when order is updated
+
+Required endpoints: 
+    GET /orders
+        query:
+            Stores, Statuses, Riders, createdBefore, createdAfter, recordsPerPage, pageNumber, 
 -Order Map Page
 --See orders on Map
 --See all on duty riders and status

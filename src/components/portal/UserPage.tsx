@@ -8,8 +8,29 @@ import {
     TableCell,
     Table,
 } from "../ui/table";
+import { useEffect, useState } from "react";
+import { getUsers } from "../../helperFunctions/userFunctions";
 
-export function UserPage(userData: UserData) {
+function emptyUserData(): UserData {
+    return {
+        items: [],
+        recordsPerPage: 50,
+        pageNumber: 1,
+        totalPages: 1,
+        totalRecords: 0,
+    };
+}
+
+export function UserPage() {
+    const [userData, setUserData] = useState<UserData>(emptyUserData());
+
+    useEffect(() => {
+        const getUserData = async () => {
+            const users = await getUsers({});
+            setUserData(users);
+        };
+        getUserData();
+    }, []);
     return (
         <>
             <Table>

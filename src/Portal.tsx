@@ -23,40 +23,15 @@ import {
     Store,
     UserData,
 } from "./lib/types";
-import { OrderList } from "./components/portal/OrderTable";
+import { OrderPage } from "./components/portal/OrderPage";
 import { UserPage } from "./components/portal/UserPage";
 import { InventoryPage } from "./components/portal/inventoryPage";
 import { StorePage } from "./components/portal/StorePage";
 import { RiderPage } from "./components/portal/RiderPage";
 
 function Portal() {
-    const [orderData, setOrderData] = useState<OrderData | null>(null);
-    const [orderFilters, setOrderFilters] = useState<OrderFilters>({
-        store: {},
-        status: {
-            NEW: false,
-            PROCESSING: false,
-            READY: false,
-            ASSIGNED: false,
-            DELIVERING: false,
-            COMPLETE: false,
-            CANCELLED: false,
-        },
-        rider: {},
-    });
-    const [orderSorting, setOrderSorting] = useState<OrderSorting>({
-        orderBy: "desc",
-    });
-    const [orderSearchQuery, setOrderSearchQuery] = useState<string>("");
     const [storeId, setStoreId] = useState<string | null>(null);
     const [storeOptions, setStoreOptions] = useState<Store[]>([]);
-    const [riderOptions, setRiderOptions] = useState<Rider[]>([]);
-    const [inventoryData, setInventoryData] = useState<InventoryData | null>(
-        null
-    );
-    const [userData, setUserData] = useState<UserData | null>(null);
-    const [riderData, setRiderData] = useState<RiderData | null>(null);
-    const [storeData, setStoreData] = useState<Store[]>([]);
     const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
     const [tab, setTab] = useState("Order List");
 
@@ -70,43 +45,6 @@ function Portal() {
         };
         getData();
     }, []);
-
-    useEffect(() => {
-        if (storeId) {
-            const getOrderData = async () => {
-                const orders = await getOrders({
-                    storeIds: [storeId],
-                    recordsPerPage: 5,
-                    pageNumber: 1,
-                    sortBy: "createdOn",
-                    orderBy: "desc",
-                });
-                setOrderData(orders);
-            };
-            const getInventoryData = async () => {
-                const inventory = await getInventoryEntries({});
-                setInventoryData(inventory);
-            };
-            const getUserData = async () => {
-                const users = await getUsers({});
-                setUserData(users);
-            };
-            const getRiderData = async () => {
-                const riders = await getRiders({});
-                setRiderData(riders);
-            };
-            const getStoreData = async () => {
-                const res = await fetch(`http://localhost:8080/stores`);
-                const stores = await res.json();
-                setStoreData(stores);
-            };
-            getOrderData();
-            getInventoryData();
-            getUserData();
-            getRiderData();
-            getStoreData();
-        }
-    }, [storeId]);
 
     return storeOptions == null ? (
         <>Loading...</>
@@ -138,7 +76,7 @@ function Portal() {
             </Button>
             <div>{currentOrder.id}</div>
         </>
-    ) : orderData && storeData ? (
+    ) : (
         <>
             <Button
                 onClick={() => {
@@ -157,36 +95,25 @@ function Portal() {
                     <TabsTrigger value="Incidents">Incidents</TabsTrigger>
                 </TabsList>
                 <TabsContent value="Order List">
-                    {OrderList(
-                        orderData,
-                        setOrderData,
-                        riderOptions,
-                        setRiderOptions,
-                        setCurrentOrder,
-                        storeId
-                    )}
+                    <OrderPage storeId={storeId}></OrderPage>
                 </TabsContent>
                 <TabsContent value="Inventory">
-                    {inventoryData ? (
-                        InventoryPage(inventoryData)
-                    ) : (
-                        <>Loading...</>
-                    )}
+                    <InventoryPage></InventoryPage>
                 </TabsContent>
                 <TabsContent value="Users">
-                    {userData ? UserPage(userData) : <>Loading...</>}
+                    <UserPage />
                 </TabsContent>
                 <TabsContent value="Riders">
-                    <>Page to view and edit riders{RiderPage(riderData)}</>
+                    <RiderPage />
                 </TabsContent>
-                <TabsContent value="Stores">{StorePage(storeData)}</TabsContent>
+                <TabsContent value="Stores">
+                    <StorePage />
+                </TabsContent>
                 <TabsContent value="Incidents">
                     Page to view and edit incidents
                 </TabsContent>
             </Tabs>
         </>
-    ) : (
-        <>Loading...</>
     );
 }
 
